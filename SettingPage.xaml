@@ -122,14 +122,28 @@
                     BorderBrush="{ThemeResource AppBarSeparatorForegroundThemeBrush}"
                     BorderThickness="0.5" />
             </Grid>
-            <CheckBox
-                x:Name="IsEnableNSFWCheckBox"
+            <StackPanel
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
-                Checked="IsEnableNSFWCheckBox_Checked"
-                Indeterminate="IsEnableNSFWCheckBox_Indeterminate"
-                IsThreeState="True"
-                Unchecked="IsEnableNSFWCheckBox_Unchecked" />
+                Orientation="Vertical"
+                Spacing="10">
+                <CheckBox
+                    x:Name="IsEnableNSFWCheckBox"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Checked="IsEnableNSFWCheckBox_Checked"
+                    Indeterminate="IsEnableNSFWCheckBox_Indeterminate"
+                    IsThreeState="True"
+                    Unchecked="IsEnableNSFWCheckBox_Unchecked" />
+                <CheckBox
+                    x:Name="IsEnableAiGeneratedCheckBox"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Checked="IsEnableAiGeneratedCheckBox_Checked"
+                    Indeterminate="IsEnableAiGeneratedCheckBox_Indeterminate"
+                    IsThreeState="True"
+                    Unchecked="IsEnableAiGeneratedCheckBox_Unchecked" />
+            </StackPanel>
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />

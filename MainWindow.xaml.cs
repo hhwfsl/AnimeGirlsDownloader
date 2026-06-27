@@ -43,9 +43,14 @@ namespace AnimeGirlsDownloader
         // Page
         private UploadImagePage? _uploadImagePage = null;
         private bool _isUploadImagePageOpen = false;
+
+        private IFileService _fileService;
+        private ISettingService _settingService;
         public MainWindow()
         {
             InitializeComponent();
+            _fileService = App.Current.Services.GetService<IFileService>()!;
+            _settingService = App.Current.Services.GetService<ISettingService>()!;
             Initialize();
             _downloader = new Downloader(BytesToBitmapImage);
             GetRandomImage(null);
@@ -53,11 +58,9 @@ namespace AnimeGirlsDownloader
         private void Initialize()
         {
             InitializeWindow();
-            var fileService = App.Current.Services.GetService<IFileService>();
-            fileService!.Initialize(this);
+            _fileService!.Initialize(this);
             this.SizeChanged += MainWindow_SizeChanged;
-            var settingService = App.Current.Services.GetService<ISettingService>();
-            settingService!.Initialize(ResizeWindowToStandardSize);
+            _settingService.Initialize(ResizeWindowToStandardSize);
 
             UploadImagePageGrid.Visibility = Visibility.Collapsed;
             DisplayImageGrid.Visibility = Visibility.Visible;
@@ -78,7 +81,7 @@ namespace AnimeGirlsDownloader
         {
             _windowWidth = AppWindow.Size.Width;
             _windowHeight = AppWindow.Size.Height;
-            App.Current.Services.GetService<ISettingService>()!
+            _settingService
                     .SetWindowWidth(_windowWidth)
                     .SetWindowHeight(_windowHeight)
                     .SaveSetting();
@@ -114,7 +117,7 @@ namespace AnimeGirlsDownloader
         /// </summary>
         private void InitializeWindowSize()
         {
-            Settings settings = App.Current.Services.GetService<ISettingService>()!.GetSettings();
+            Settings settings = _settingService.GetSettings();
             if (settings.WindowWidth != 0 && settings.WindowHeight != 0)
             {
                 _windowWidth = settings.WindowWidth;
@@ -131,7 +134,7 @@ namespace AnimeGirlsDownloader
         /// </summary>
         private void InitializeWindowTheme()
         {
-            Settings settings = App.Current.Services.GetService<ISettingService>()!.GetSettings();
+            Settings settings = _settingService.GetSettings();
             MainGrid.RequestedTheme = settings.AppTheme;
         }
         private void ResizeWindowToStandardSize()
@@ -139,7 +142,7 @@ namespace AnimeGirlsDownloader
             DisplayArea displayArea = DisplayArea.GetFromWindowId(_windowId, DisplayAreaFallback.Primary);
             _windowWidth = displayArea.WorkArea.Width / 2;
             _windowHeight = displayArea.WorkArea.Height / 3 * 2;
-            App.Current.Services.GetService<ISettingService>()!
+            _settingService
                 .SetWindowWidth(_windowWidth)
                 .SetWindowHeight(_windowHeight)
                 .SaveSetting();
@@ -242,7 +245,7 @@ namespace AnimeGirlsDownloader
             }
         }
 
-        private async void GetRandomImage(List<Models.Tag>? tags)
+        private async void GetRandomImage(List<Tag>? tags)
         {
             if (_isGettingImage)
             {
@@ -260,8 +263,8 @@ namespace AnimeGirlsDownloader
             }
             
 
-            Settings settings = App.Current.Services.GetService<ISettingService>()!.GetSettings();
-            await _downloader.GetRandomImage(tags, settings.ImageType);
+            Settings settings = _settingService.GetSettings();
+            await _downloader.GetRandomImage(tags, settings.ImageType, settings.IsAllowAiGenerated);
 
             ImageLoadingProgressRing.Visibility = Visibility.Collapsed;
             ImageLoadingProgressRing.IsActive = false;
@@ -283,7 +286,7 @@ namespace AnimeGirlsDownloader
             ImageLoadingProgressRing.Visibility = Visibility.Visible;
             ImageLoadingProgressRing.IsActive = true;
 
-            Settings settings = App.Current.Services.GetService<ISettingService>()!.GetSettings();
+            Settings settings = _settingService.GetSettings();
             await _downloader.GetImageById(id);
 
             ImageLoadingProgressRing.Visibility = Visibility.Collapsed;
@@ -317,8 +320,8 @@ namespace AnimeGirlsDownloader
         }
         private async void SaveImage()
         {
-            string savingPath = App.Current.Services.GetService<ISettingService>()!.GetSettings().SavingPath ?? string.Empty;
-            bool isFixedSavingPath = App.Current.Services.GetService<ISettingService>()!.GetSettings().IsEnableFixedSavingPath;
+            string savingPath = _settingService.GetSettings().SavingPath ?? string.Empty;
+            bool isFixedSavingPath = _settingService.GetSettings().IsEnableFixedSavingPath;
             if (_imageBytes == null)
             {
                 AppLogger.LogError(AppResourceLoader.GetString("Error_MainWindow_SaveImage_1"));
@@ -326,14 +329,10 @@ namespace AnimeGirlsDownloader
             }
             if (!isFixedSavingPath)
             {
-                var folderPicker = App.Current.Services.GetService<IFileService>();
-                if (folderPicker != null)
+                StorageFolder? folder = await _fileService.PickFolderAsync();
+                if (folder != null)
                 {
-                    StorageFolder? folder = await folderPicker.PickFolderAsync();
-                    if (folder != null)
-                    {
-                        savingPath = folder.Path;
-                    }
+                    savingPath = folder.Path;
                 }
             }
             savingPath = Path.Combine(savingPath, $"{_imageId}.png");
@@ -419,14 +418,14 @@ namespace AnimeGirlsDownloader
         private void ChangeThemeButton_Click(object sender, RoutedEventArgs e)
         {
             MainGrid.RequestedTheme = MainGrid.RequestedTheme == ElementTheme.Dark ? ElementTheme.Light : ElementTheme.Dark;
-            App.Current.Services.GetService<ISettingService>()!
+            _settingService
                 .SetAppTheme(MainGrid.RequestedTheme)
                 .SaveSetting();
         }
 
         private async void OpenSavingPathButton_Click(object sender, RoutedEventArgs e)
         {
-            string path = App.Current.Services.GetService<ISettingService>()!.GetSettings().SavingPath ?? string.Empty;
+            string path = _settingService.GetSettings().SavingPath ?? string.Empty;
             if (string.IsNullOrEmpty(path))
             {
                 AppLogger.LogError(AppResourceLoader.GetString("Error_MainWindow_OpenSavingPathButtonClick_1"));

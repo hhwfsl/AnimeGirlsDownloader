@@ -1,4 +1,5 @@
 ﻿using AnimeGirlsDownloader.Enums;
+using AnimeGirlsDownloader.Interfaces;
 using AnimeGirlsDownloader.Models;
 using AnimeGirlsDownloader.Requests;
 using AnimeGirlsDownloader.Responses;
@@ -67,7 +68,7 @@ namespace AnimeGirlsDownloader
             _bytesToBitmapImageHandler?.Invoke(bytes, id, tags);
         }
 
-        public async Task GetRandomImage(List<Tag>? tags, ImageType type)
+        public async Task GetRandomImage(List<Tag>? tags, ImageType type, ImageIsAllowAiType isAllowAiGenerated)
         {
             using HttpClient client = new HttpClient();
             client.Timeout = _timeout;
@@ -76,7 +77,8 @@ namespace AnimeGirlsDownloader
             GetImageRequest request = new GetImageRequest
             {
                 Tags = tags,
-                Type = type
+                Type = type,
+                IsAllowAiGenerated = isAllowAiGenerated
             };
             try
             {

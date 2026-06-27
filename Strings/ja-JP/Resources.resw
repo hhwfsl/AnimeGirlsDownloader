@@ -303,4 +303,16 @@
   <data name="Info_UploadImagePage_BatchUpload_1" xml:space="preserve">
     <value>アップロード完了。全部で{0}枚の画像、成功は{1}枚、失敗は{2}枚</value>
   </data>
+  <data name="IsEnableAiGenerated_CheckBox.Content" xml:space="preserve">
+    <value>AIが生成した画像を許可するかどうか</value>
+  </data>
+  <data name="IsEnableAiGenerated_CheckBox_Checked" xml:space="preserve">
+    <value>AIを許可するか：許可</value>
+  </data>
+  <data name="IsEnableAiGenerated_CheckBox_Unchecked" xml:space="preserve">
+    <value>AIを許可する：いいえ</value>
+  </data>
+  <data name="IsEnableAiGenerated_CheckBox_Indeterminate" xml:space="preserve">
+    <value>AIを許可：AIのみ</value>
+  </data>
 </root>

@@ -11,7 +11,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
-using Windows.Storage.Search;
 
 namespace AnimeGirlsDownloader
 {
@@ -28,42 +27,21 @@ namespace AnimeGirlsDownloader
         private bool _isAiGenerate = false;
 
         private bool _isUploading = false;
-        //private DispatcherTimer _timer = new DispatcherTimer();
-        //private List<string> _searchedTagStrings = new List<string>();
+
+        private ISettingService _settingService;
 
         private Action? _closePage = null;
         public UploadImagePage()
         {
             InitializeComponent();
             _uploader.Initialize(ResultHandler);
-            _uploaderName = App.Current.Services.GetService<ISettingService>()!.GetSettings().LoggedUserName;
+            _settingService = App.Current.Services.GetService<ISettingService>()!;
+            _uploaderName = _settingService.GetSettings().LoggedUserName;
             _fileService = App.Current.Services.GetService<IFileService>()!;
             UploadImage.Visibility = Microsoft.UI.Xaml.Visibility.Collapsed;
             DropImageTextBlock.Visibility = Microsoft.UI.Xaml.Visibility.Visible;
             UploadPageTipTeachingTip.IsOpen = false;
-
-            //_timer.Interval = TimeSpan.FromMilliseconds(500);
-            //_timer.Tick += TimerTick;
-            //TagAutoSuggestBox.ItemsSource = _searchedTagStrings;
-
         }
-        /*
-        private async void TimerTick(object? sender, object e)
-        {
-            _timer.Stop();
-            string partialTag = TagAutoSuggestBox.Text;
-            if(!string.IsNullOrEmpty(partialTag))
-            {
-                List<Models.Tag> searchedTags = await _uploader.GetTagsByPartialTag(new TagRequest { PartialTag = partialTag})?? new List<Models.Tag>();
-                List<string> searchedTagStrings = new List<string>();
-                foreach(Models.Tag tag in searchedTags)
-                {
-                    searchedTagStrings.Add(tag.Name);
-                }
-                TagAutoSuggestBox.ItemsSource = searchedTagStrings;
-            }
-        }
-        */
         public void Initialize(Action closePage)
         {
             _closePage = closePage;

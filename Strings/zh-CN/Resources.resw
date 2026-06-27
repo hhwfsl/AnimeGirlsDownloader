@@ -303,4 +303,16 @@
   <data name="Info_UploadImagePage_BatchUpload_1" xml:space="preserve">
     <value>上传完成。一共{0}个图片，成功{1}个，失败{2}个</value>
   </data>
+  <data name="IsEnableAiGenerated_CheckBox.Content" xml:space="preserve">
+    <value>是否允许AI生成的图片</value>
+  </data>
+  <data name="IsEnableAiGenerated_CheckBox_Checked" xml:space="preserve">
+    <value>是否允许AI：允许</value>
+  </data>
+  <data name="IsEnableAiGenerated_CheckBox_Unchecked" xml:space="preserve">
+    <value>是否允许AI：不允许</value>
+  </data>
+  <data name="IsEnableAiGenerated_CheckBox_Indeterminate" xml:space="preserve">
+    <value>是否允许AI：仅AI</value>
+  </data>
 </root>

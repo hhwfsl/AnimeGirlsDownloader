@@ -18,9 +18,17 @@ namespace AnimeGirlsDownloader
         private Settings _settings = new Settings();
         private Dictionary<ImageType, bool?> _imageTypeToBool = new Dictionary<ImageType, bool?> 
         { { ImageType.SFW, false }, { ImageType.NSFW, true }, { ImageType.ALL, null } };
+        
+        private Dictionary<ImageIsAllowAiType, bool?> _imageIsAllowAiTypeToBool = new Dictionary<ImageIsAllowAiType, bool?> 
+        { { ImageIsAllowAiType.NotAllowAi, false }, { ImageIsAllowAiType.AiOnly, null }, { ImageIsAllowAiType.ALL, true } };
+
+        private ISettingService _settingService;
+        private IFileService _fileService;
         public SettingPage()
         {
             InitializeComponent();
+            _settingService = App.Current.Services.GetService<ISettingService>()!;
+            _fileService = App.Current.Services.GetService<IFileService>()!;
             Initialize();
         }
         private void Initialize()
@@ -32,9 +40,10 @@ namespace AnimeGirlsDownloader
         }
         private void InitializeSettings()
         {
-            _settings = App.Current.Services.GetService<ISettingService>()!.GetSettings();
+            _settings = _settingService.GetSettings();
 
             IsEnableNSFWCheckBox.IsChecked = _imageTypeToBool[_settings.ImageType];
+            IsEnableAiGeneratedCheckBox.IsChecked = _imageIsAllowAiTypeToBool[_settings.IsAllowAiGenerated];
             if(IsEnableNSFWCheckBox.IsChecked != null)
             {
                 IsEnableNSFWCheckBox.Content = AppResourceLoader.GetString((bool)IsEnableNSFWCheckBox.IsChecked? "IsEnableNSFW_CheckBox_Checked": "IsEnableNSFW_CheckBox_Unchecked");
@@ -42,6 +51,14 @@ namespace AnimeGirlsDownloader
             else
             {
                 IsEnableNSFWCheckBox.Content = AppResourceLoader.GetString("IsEnableNSFW_CheckBox_Indeterminate");
+            }
+            if(IsEnableAiGeneratedCheckBox.IsChecked != null)
+            {
+                IsEnableAiGeneratedCheckBox.Content = AppResourceLoader.GetString((bool)IsEnableAiGeneratedCheckBox.IsChecked ? "IsEnableAiGenerated_CheckBox_Checked" : "IsEnableAiGenerated_CheckBox_Unchecked");
+            }
+            else
+            {
+                IsEnableAiGeneratedCheckBox.Content = AppResourceLoader.GetString("IsEnableAiGenerated_CheckBox_Indeterminate");
             }
             IsEnableFixedSavingPathCheckBox.IsChecked = _settings.IsEnableFixedSavingPath;
             if (_settings.IsEnableFixedSavingPath)
@@ -53,14 +70,12 @@ namespace AnimeGirlsDownloader
             if (!File.Exists(_settings.UserAvatarPath))
             {
                 _settings.UserAvatarPath = Path.Combine(AppConsts.AppAssetsDirectory, "avatar.png");
-                App.Current.Services.GetService<ISettingService>()!
-                    .SetUserAvatarPath(_settings.UserAvatarPath)
-                    .SaveSetting();
+                _settingService.SetUserAvatarPath(_settings.UserAvatarPath).SaveSetting();
             }
             UserAvatarImageBrush.ImageSource = new BitmapImage(new Uri(_settings.UserAvatarPath));
             if (string.IsNullOrEmpty(_settings.UserName))
             {
-                _settings.UserName = App.Current.Services.GetService<ISettingService>()!.SetDefaultUserNameWithSaving();
+                _settings.UserName = _settingService.SetDefaultUserNameWithSaving();
             }
             UserNameTextBlock.Text = _settings.UserName;
         }
@@ -82,7 +97,7 @@ namespace AnimeGirlsDownloader
             LoggedAccountNameTextBlock.Text = userName;
             _settings.LoggedUserName = userName;
             _settings.LoggedUserPassword = password;
-            App.Current.Services.GetService<ISettingService>()!.SaveSetting(_settings);
+            _settingService.SaveSetting(_settings);
             InitializeLogin();
         }
 
@@ -90,53 +105,49 @@ namespace AnimeGirlsDownloader
         {
             PathSelectStackPanel.Visibility = Microsoft.UI.Xaml.Visibility.Visible;
             _settings.IsEnableFixedSavingPath = true;
-            App.Current.Services.GetService<ISettingService>()!.SaveSetting(_settings);
+            _settingService.SaveSetting(_settings);
         }
 
         private void IsEnableFixedSavingPathCheckBox_Unchecked(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
             PathSelectStackPanel.Visibility = Microsoft.UI.Xaml.Visibility.Collapsed;
             _settings.IsEnableFixedSavingPath = false;
-            App.Current.Services.GetService<ISettingService>()!.SaveSetting(_settings);
+            _settingService.SaveSetting(_settings);
         }
 
         private async void PathSelectButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
-            var folderPicker = App.Current.Services.GetService<IFileService>();
-            if (folderPicker != null)
+            StorageFolder? folder = await _fileService.PickFolderAsync();
+            if (folder != null)
             {
-                StorageFolder? folder = await folderPicker.PickFolderAsync();
-                if (folder != null)
-                {
-                    _settings.SavingPath = folder.Path;
-                    App.Current.Services.GetService<ISettingService>()!.SaveSetting(_settings);
-                }
+                _settings.SavingPath = folder.Path;
+                _settingService.SaveSetting(_settings);
             }
         }
 
         private void IsEnableNSFWCheckBox_Checked(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
             _settings.ImageType = ImageType.NSFW;
-            App.Current.Services.GetService<ISettingService>()!.SaveSetting(_settings);
+            _settingService.SaveSetting(_settings);
             IsEnableNSFWCheckBox.Content = AppResourceLoader.GetString("IsEnableNSFW_CheckBox_Checked");
         }
 
         private void IsEnableNSFWCheckBox_Unchecked(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
             _settings.ImageType = ImageType.SFW;
-            App.Current.Services.GetService<ISettingService>()!.SaveSetting(_settings);
+            _settingService.SaveSetting(_settings);
             IsEnableNSFWCheckBox.Content = AppResourceLoader.GetString("IsEnableNSFW_CheckBox_Unchecked");
         }
         private void IsEnableNSFWCheckBox_Indeterminate(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
             _settings.ImageType = ImageType.ALL;
-            App.Current.Services.GetService<ISettingService>()!.SaveSetting(_settings);
+            _settingService.SaveSetting(_settings);
             IsEnableNSFWCheckBox.Content = AppResourceLoader.GetString("IsEnableNSFW_CheckBox_Indeterminate");
         }
 
         private void ResizeWindowButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
-            App.Current.Services.GetService<ISettingService>()!.ResizeWindowToStandardSize();
+            _settingService.ResizeWindowToStandardSize();
         }
 
         private void LanguageListComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -148,23 +159,19 @@ namespace AnimeGirlsDownloader
                 return;
             }
             string languageCode = LanguageMap.SimpleToFull(LanguageMap.DisplayToSimple(selectedItem));
-            App.Current.Services.GetService<ISettingService>()!.SetLanguage(languageCode).SaveSetting();
+            _settingService.SetLanguage(languageCode).SaveSetting();
             _settings.Language = languageCode;
 
         }
 
         private async void EditUserAvatarMenuFlyoutItem_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
-            var filePicker = App.Current.Services.GetService<IFileService>();
-            if (filePicker != null)
+            StorageFile? file = await _fileService.PickImageAsync();
+            if (file != null)
             {
-                StorageFile? file = await filePicker.PickImageAsync();
-                if (file != null)
-                {
-                    _settings.UserAvatarPath = file.Path;
-                    UserAvatarImageBrush.ImageSource = new BitmapImage(new Uri(file.Path));
-                    App.Current.Services.GetService<ISettingService>()!.SaveSetting(_settings);
-                }
+                _settings.UserAvatarPath = file.Path;
+                UserAvatarImageBrush.ImageSource = new BitmapImage(new Uri(file.Path));
+                _settingService.SaveSetting(_settings);
             }
         }
 
@@ -189,7 +196,7 @@ namespace AnimeGirlsDownloader
             }
             UserNameTextBlock.Text = newUserName;
             _settings.UserName = newUserName;
-            App.Current.Services.GetService<ISettingService>()!.SetUserName(newUserName).SaveSetting();
+            _settingService.SetUserName(newUserName).SaveSetting();
             UserNameTextBlock.Visibility = Microsoft.UI.Xaml.Visibility.Visible;
             UserNameTextBox.Visibility = Microsoft.UI.Xaml.Visibility.Collapsed;
         }
@@ -226,7 +233,7 @@ namespace AnimeGirlsDownloader
         {
             _settings.LoggedUserName = null;
             _settings.LoggedUserPassword = null;
-            App.Current.Services.GetService<ISettingService>()!.SaveSetting(_settings);
+            _settingService.SaveSetting(_settings);
             if(File.Exists(AppConsts.AuthFilePath))
             {
                 File.Delete(AppConsts.AuthFilePath);
@@ -235,6 +242,25 @@ namespace AnimeGirlsDownloader
             LoginButton.Visibility = Microsoft.UI.Xaml.Visibility.Visible;
         }
 
-        
+        private void IsEnableAiGeneratedCheckBox_Checked(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        {
+            _settings.IsAllowAiGenerated = ImageIsAllowAiType.ALL;
+            _settingService.SaveSetting(_settings);
+            IsEnableAiGeneratedCheckBox.Content = AppResourceLoader.GetString("IsEnableAiGenerated_CheckBox_Checked");
+        }
+
+        private void IsEnableAiGeneratedCheckBox_Unchecked(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        {
+            _settings.IsAllowAiGenerated = ImageIsAllowAiType.NotAllowAi;
+            _settingService.SaveSetting(_settings);
+            IsEnableAiGeneratedCheckBox.Content = AppResourceLoader.GetString("IsEnableAiGenerated_CheckBox_Unchecked");
+        }
+
+        private void IsEnableAiGeneratedCheckBox_Indeterminate(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        {
+            _settings.IsAllowAiGenerated = ImageIsAllowAiType.AiOnly;
+            _settingService.SaveSetting(_settings);
+            IsEnableAiGeneratedCheckBox.Content = AppResourceLoader.GetString("IsEnableAiGenerated_CheckBox_Indeterminate");
+        }
     }
 }

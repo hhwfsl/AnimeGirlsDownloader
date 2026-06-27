@@ -14,6 +14,7 @@ namespace AnimeGirlsDownloader.Models
 
         // Browse and download settings
         public ImageType ImageType { get; set; } = ImageType.SFW;
+        public ImageIsAllowAiType IsAllowAiGenerated { get; set; } = ImageIsAllowAiType.NotAllowAi;
         public bool IsEnableFixedSavingPath { get; set; } = false;
         public string? SavingPath { get; set; } = null;
         public string Language { get; set; } = "en-US";// Only set full language tag here, e.g., en-US, zh-Hans-CN, ja-JP

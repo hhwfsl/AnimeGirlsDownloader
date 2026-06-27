@@ -10,7 +10,7 @@ namespace AnimeGirlsDownloader.Requests
         public long? Id { get; set; }
         public List<Tag>? Tags { get; set; }
         public ImageType Type { get; set; }
-        public bool IsAiGenerate { get; set; }
+        public ImageIsAllowAiType IsAllowAiGenerated { get; set; }
     }
     [JsonSourceGenerationOptions(WriteIndented = true)]
     [JsonSerializable(typeof(GetImageRequest))]
