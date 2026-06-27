@@ -277,6 +277,7 @@ namespace AnimeGirlsDownloader
             {
                 MaxDegreeOfParallelism = Math.Max(1, Environment.ProcessorCount - 1)
             };
+            _isUploading = true;
             await Parallel.ForEachAsync(imageFiles, parallelOptions, async (file, token) =>
             {
                 if (file == null) return;
@@ -289,7 +290,9 @@ namespace AnimeGirlsDownloader
                     IsNSFW = _isNSFW,
                     Data = await _fileService.ImageToBytes(imagePath)
                 };
+                await _uploader.UploadImage(uploadImageRequest);
             });
+            _isUploading = false;
         }
     }
 }
