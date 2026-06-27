@@ -300,4 +300,7 @@
   <data name="BatchUploadButton_TextBlock.Text" xml:space="preserve">
     <value>まとめてアップロード</value>
   </data>
+  <data name="Info_UploadImagePage_BatchUpload_1" xml:space="preserve">
+    <value>アップロード完了。全部で{0}枚の画像、成功は{1}枚、失敗は{2}枚</value>
+  </data>
 </root>

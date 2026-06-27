@@ -1,3 +1,4 @@
+using AnimeGirlsDownloader.Enums;
 using AnimeGirlsDownloader.Interfaces;
 using AnimeGirlsDownloader.Models;
 using Microsoft.Extensions.DependencyInjection;
@@ -33,11 +34,9 @@ namespace AnimeGirlsDownloader
         private Downloader _downloader;
         private byte[]? _imageBytes = null;
         private string _imageId = string.Empty;
-        private Queue<string> _errorMessageQueue = new Queue<string>();
-        private Queue<string> _warningMessageQueue = new Queue<string>();
+        private Queue<InfoMessage> _infoMessageQueue = new Queue<InfoMessage>();
         // Control
-        private SemaphoreSlim _errorQueueSemaphore = new SemaphoreSlim(0);
-        private SemaphoreSlim _warningQueueSemaphore = new SemaphoreSlim(0);
+        private SemaphoreSlim _infoQueueSemaphore = new SemaphoreSlim(0);
         private bool _isWindowClosing = false;
         private bool _isGettingImage = false;
 
@@ -68,8 +67,7 @@ namespace AnimeGirlsDownloader
 
             this.Closed += WindowClosed;
 
-            Task.Run(ErrorInfo);// When error occurs, show InfoBar in the main window
-            Task.Run(WarningInfo);
+            Task.Run(InfomationInfo);
         }
         /// <summary>
         /// Save window size when window size changed.
@@ -147,69 +145,38 @@ namespace AnimeGirlsDownloader
                 .SaveSetting();
             AppWindow.Resize(new Windows.Graphics.SizeInt32(_windowWidth, _windowHeight));
         }
-        private void AddErrorAndWarningMessageToQueue(InfoBarSeverity status, string message)
+        private void AddErrorAndWarningMessageToQueue(InfoBarSeverity status, string message, InfoBarInfoType type)
         {
-            if (status == InfoBarSeverity.Error)
+            InfoMessage infoMessage = new InfoMessage
             {
-                _errorMessageQueue.Enqueue(message);
-                _errorQueueSemaphore.Release();
-            }
-            else if (status == InfoBarSeverity.Warning)
-            {
-                _warningMessageQueue.Enqueue(message);
-                _warningQueueSemaphore.Release();
-            }
+                Message = message,
+                InfoBarType = type,
+                Severity = status
+            };
+            _infoMessageQueue.Enqueue(infoMessage);
+            _infoQueueSemaphore.Release();
         }
-        /// <summary>
-        /// Give error to InfoBar from the error message queue.
-        /// </summary>
-        /// <returns></returns>
-        private async Task ErrorInfo()
+        private async Task InfomationInfo()
         {
             while (!_isWindowClosing)
             {
-                await _errorQueueSemaphore.WaitAsync();
-                if (_errorMessageQueue.Count > 0)
+                await _infoQueueSemaphore.WaitAsync();
+                if (_infoMessageQueue.Count > 0)
                 {
-                    string message = _errorMessageQueue.Dequeue();
-                    DispatcherQueue.TryEnqueue(() => ErrorInfo(message));
+                    InfoMessage infoMessage = _infoMessageQueue.Dequeue();
+                    if(infoMessage.InfoBarType == InfoBarInfoType.Manually)
+                    {
+                        DispatcherQueue.TryEnqueue(() => InfoManuallyClose(infoMessage.Severity, infoMessage.Message));
+                    }
+                    else
+                    {
+                        DispatcherQueue.TryEnqueue(() => InfoAutoClose(infoMessage.Severity, infoMessage.Message));
+                    }
                 }
                 await Task.Delay(200);
             }
         }
-        /// <summary>
-        /// Give warning to InfoBar from the warning message queue.
-        /// </summary>
-        /// <returns></returns>
-        private async Task WarningInfo()
-        {
-            while (!_isWindowClosing)
-            {
-                await _warningQueueSemaphore.WaitAsync();
-                if (_warningMessageQueue.Count > 0)
-                {
-                    string message = _warningMessageQueue.Dequeue();
-                    DispatcherQueue.TryEnqueue(() => WarningInfo(message));
-                }
-                await Task.Delay(200);
-            }
-        }
-        private void ErrorInfo(string message)
-        {
-            InfoManuallyClose(InfoBarSeverity.Error, message);
-        }
-        private void SuccessInfo(string message)
-        {
-            InfoAutoClose(InfoBarSeverity.Success, message);
-        }
-        private void WarningInfo(string message)
-        {
-            InfoManuallyClose(InfoBarSeverity.Warning, message);
-        }
-        private void InfomationInfo(string message)
-        {
-            InfoAutoClose(InfoBarSeverity.Informational, message);
-        }
+        
         private void WindowClosed(object? sender, WindowEventArgs args)
         {
             _isWindowClosing = true;
@@ -279,7 +246,7 @@ namespace AnimeGirlsDownloader
         {
             if (_isGettingImage)
             {
-                InfomationInfo(AppResourceLoader.GetString("Error_MainWindow_GetRandomImage_1"));
+                AddErrorAndWarningMessageToQueue(InfoBarSeverity.Informational, AppResourceLoader.GetString("Error_MainWindow_GetRandomImage_1"), InfoBarInfoType.Auto);
                 return;
             }
             _isGettingImage = true;
@@ -308,7 +275,7 @@ namespace AnimeGirlsDownloader
         {
             if (_isGettingImage)
             {
-                InfomationInfo(AppResourceLoader.GetString("Error_MainWindow_GetRandomImage_1"));
+                AddErrorAndWarningMessageToQueue(InfoBarSeverity.Informational, AppResourceLoader.GetString("Error_MainWindow_GetRandomImage_1"), InfoBarInfoType.Auto);
                 return;
             }
             _isGettingImage = true;
@@ -379,7 +346,7 @@ namespace AnimeGirlsDownloader
                 AppLogger.LogError(e.Message);
             }
             AppLogger.LogInfo($"{AppResourceLoader.GetString("Info_MainWindow_SaveImage_1")}{savingPath}");
-            SuccessInfo(AppResourceLoader.GetString("Success_MainWindow_SaveImage_1"));
+            AddErrorAndWarningMessageToQueue(InfoBarSeverity.Success, AppResourceLoader.GetString("Success_MainWindow_SaveImage_1"), InfoBarInfoType.Auto);
         }
         private async Task CopyImageToClipBoard()
         {
@@ -400,7 +367,7 @@ namespace AnimeGirlsDownloader
             Clipboard.SetContent(dataPackage);
             Clipboard.Flush();
             ms.Dispose();
-            SuccessInfo(AppResourceLoader.GetString("Success_MainWindow_CopyImageToClipBoard_1"));
+            AddErrorAndWarningMessageToQueue(InfoBarSeverity.Success, AppResourceLoader.GetString("Success_MainWindow_CopyImageToClipBoard_1"), InfoBarInfoType.Auto);
         }
 
         [DllImport("user32.dll")]

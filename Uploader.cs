@@ -24,7 +24,7 @@ namespace AnimeGirlsDownloader
         {
             _resultHandler = resultHandler;
         }
-        public async Task UploadImage(UploadImageRequest request)
+        public async Task<bool> UploadImage(UploadImageRequest request)
         {
             using HttpClient client = new HttpClient();
             client.Timeout = _timeout;
@@ -42,10 +42,12 @@ namespace AnimeGirlsDownloader
                 var result = JsonSerializer.Deserialize<MessageResponse>(json, MessageResponseContext.Default.MessageResponse);
                 _resultHandler?.Invoke(result!.Message);
                 client.Dispose();
+                return true;
             }
             catch (Exception e)
             {
                 AppLogger.LogError(e.Message);
+                return false;
             }
             finally
             {

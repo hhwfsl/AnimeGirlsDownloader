@@ -300,4 +300,7 @@
   <data name="BatchUploadButton_TextBlock.Text" xml:space="preserve">
     <value>批量上传</value>
   </data>
+  <data name="Info_UploadImagePage_BatchUpload_1" xml:space="preserve">
+    <value>上传完成。一共{0}个图片，成功{1}个，失败{2}个</value>
+  </data>
 </root>

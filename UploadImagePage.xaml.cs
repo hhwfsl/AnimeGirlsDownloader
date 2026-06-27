@@ -1,7 +1,6 @@
 using AnimeGirlsDownloader.Interfaces;
 using AnimeGirlsDownloader.Models;
 using AnimeGirlsDownloader.Requests;
-using AnimeGirlsDownloader.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Imaging;
@@ -256,15 +255,14 @@ namespace AnimeGirlsDownloader
             }
             var imageFiles = new List<StorageFile>();
 
-            var queryOptions = new QueryOptions(CommonFileQuery.DefaultQuery, _allowedExtensions);
-
-            queryOptions.FolderDepth = FolderDepth.Deep;
-
-            var query = folder.CreateFileQueryWithOptions(queryOptions);
-            var files = await query.GetFilesAsync();
-            imageFiles.AddRange(
-                files.Where(file => _allowedExtensions.Contains(file.FileType.ToLower()))
-            );
+            var items = await folder.GetItemsAsync();
+            foreach (var file in items)
+            {
+                if(file is StorageFile storageFile && _allowedExtensions.Contains(storageFile.FileType.ToLower()))
+                {
+                    imageFiles.Add(storageFile);
+                }
+            }
             await BatchUpload(imageFiles);
         }
         private async Task BatchUpload(IReadOnlyList<StorageFile?>? imageFiles)
@@ -273,16 +271,19 @@ namespace AnimeGirlsDownloader
             {
                 return;
             }
-            var parallelOptions = new ParallelOptions
-            {
-                MaxDegreeOfParallelism = Math.Max(1, Environment.ProcessorCount - 1)
-            };
+            //var parallelOptions = new ParallelOptions
+            //{
+            //    MaxDegreeOfParallelism = Math.Max(1, Environment.ProcessorCount)
+            //};
             _isUploading = true;
-            await Parallel.ForEachAsync(imageFiles, parallelOptions, async (file, token) =>
+            int totalFileCount = 0;
+            int successFileCount = 0;
+            foreach(var file in imageFiles)
             {
-                if (file == null) return;
+                if (file == null) continue;
                 string imagePath = file.Path;
-                if (string.IsNullOrEmpty(imagePath) || !File.Exists(imagePath)) return;
+                if (string.IsNullOrEmpty(imagePath) || !File.Exists(imagePath)) continue;
+                totalFileCount++;
                 UploadImageRequest uploadImageRequest = new UploadImageRequest
                 {
                     Uploader = _uploaderName,
@@ -290,9 +291,15 @@ namespace AnimeGirlsDownloader
                     IsNSFW = _isNSFW,
                     Data = await _fileService.ImageToBytes(imagePath)
                 };
-                await _uploader.UploadImage(uploadImageRequest);
-            });
+                bool isSuccess = await _uploader.UploadImage(uploadImageRequest);
+                if(isSuccess)
+                {
+                    successFileCount++;
+                }
+            }
             _isUploading = false;
+            string message = AppResourceLoader.GetString("Info_UploadImagePage_BatchUpload_1");
+            AppLogger.LogInfoWithInfoBar(string.Format(message,totalFileCount,successFileCount,totalFileCount-successFileCount));
         }
     }
 }
