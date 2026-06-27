@@ -13,5 +13,6 @@ namespace AnimeGirlsDownloader
         public static readonly string AppUserAgent = "MiakiAnimeGirllDownloader";
         public static readonly string AppLogPath = Path.Combine(AppBaseDirectory, "logs");
         public static readonly string AuthFilePath = Path.Combine(AppBaseDirectory, "auth.token");
+
     }
 }
