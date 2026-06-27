@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "AnimeGirlsDownloader (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "AnimeGirlsDownloader (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

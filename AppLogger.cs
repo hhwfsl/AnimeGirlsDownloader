@@ -1,0 +1,55 @@
+﻿using Microsoft.UI.Xaml.Controls;
+using System;
+using System.IO;
+using System.Threading;
+
+namespace AnimeGirlsDownloader
+{
+    public static class AppLogger
+    {
+        private static readonly SemaphoreSlim _logLock = new SemaphoreSlim(1, 1);
+        private static Action<InfoBarSeverity, string>? _addToMessageQueue = null;
+        //private static Action<string>? _InfoInfomation = null;
+        private static async void WriteLog(InfoBarSeverity status, string message)
+        {
+            await _logLock.WaitAsync();
+            string log = $"[{status}][{DateTime.Now:G}] {message}";
+            string path = Path.Combine(AppConsts.AppLogPath, $"{DateTime.Now:D}.txt");
+            Console.WriteLine(log);
+            if (!Directory.Exists(AppConsts.AppLogPath))
+            {
+                Directory.CreateDirectory(AppConsts.AppLogPath);
+            }
+            if (!File.Exists(path))
+            {
+                File.Create(path).Close();
+            }
+            await File.AppendAllTextAsync(path, log + Environment.NewLine);
+            if (status == InfoBarSeverity.Error || status == InfoBarSeverity.Warning)
+            {
+                _addToMessageQueue?.Invoke(status, log);
+            }
+            _logLock.Release();
+        }
+        public static void Initialize(Action<InfoBarSeverity, string> addToMessageQueue)
+        {
+            _addToMessageQueue = addToMessageQueue;
+        }
+        public static void LogInfo(string message)
+        {
+            WriteLog(InfoBarSeverity.Informational, message);
+        }
+        public static void LogWarning(string message)
+        {
+            WriteLog(InfoBarSeverity.Warning, message);
+        }
+        public static void LogError(string message)
+        {
+            WriteLog(InfoBarSeverity.Error, message);
+        }
+        public static void InfoInfomation(string message)
+        {
+
+        }
+    }
+}

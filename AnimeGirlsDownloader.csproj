@@ -1,0 +1,155 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <RootNamespace>AnimeGirlsDownloader</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Platforms>x86;x64;ARM64</Platforms>
+    <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
+    <PublishProfile>win-$(Platform).pubxml</PublishProfile>
+    <UseWinUI>true</UseWinUI>
+    <WinUISDKReferences>false</WinUISDKReferences>
+    <EnableMsixTooling>true</EnableMsixTooling>
+    <Nullable>enable</Nullable>
+	  <PublishAot>true</PublishAot>
+	  <PublishSingleFile>false</PublishSingleFile>
+	  <!--<WindowsPackageType>None</WindowsPackageType>-->
+	  <WindowsPackageType>None</WindowsPackageType>
+  </PropertyGroup>
+	<ItemGroup>
+		<None Remove="LoginPage.xaml" />
+		<None Remove="SettingPage.xaml" />
+		<None Remove="Styles\ButtonResourceDictionary.xaml" />
+		<None Remove="Styles\EllipseResourceDictionary.xaml" />
+		<None Remove="Styles\ThemeResourceDictionary.xaml" />
+		<None Remove="UploadImagePage.xaml" />
+		<None Remove="UserControls\Tag.xaml" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Manifest Include="$(ApplicationManifest)" />
+	</ItemGroup>
+
+  <!--
+    Defining the "Msix" ProjectCapability here allows the Single-project MSIX Packaging
+    Tools extension to be activated for this project even if the Windows App SDK Nuget
+    package has not yet been restored.
+  -->
+  <ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
+    <ProjectCapability Include="Msix" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.WinUI.Controls.Primitives" Version="8.2.251219" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.7463" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.251106002" />
+    <PackageReference Include="SkiaSharp" Version="3.119.1" />
+  </ItemGroup>
+	<ItemGroup>
+		<None Update="Assets\icon.png">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<Page Update="UserControls\Tag.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</Page>
+		<Page Update="UploadImagePage.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</Page>
+		<Page Update="LoginPage.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</Page>
+	</ItemGroup>
+	<ItemGroup>
+		<Page Update="SettingPage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</Page>
+	</ItemGroup>
+	<ItemGroup>
+		<Page Update="Styles\EllipseResourceDictionary.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</Page>
+	</ItemGroup>
+	<ItemGroup>
+		<Page Update="Styles\ThemeResourceDictionary.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</Page>
+	</ItemGroup>
+	<ItemGroup>
+		<Page Update="Styles\ButtonResourceDictionary.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</Page>
+	</ItemGroup>
+	<PropertyGroup Label="Globals">
+		<WebView2EnableCsWinRTProjection>True</WebView2EnableCsWinRTProjection>
+		<WebView2LoaderPreference>Dynamic</WebView2LoaderPreference>
+	</PropertyGroup>
+
+  <!--
+    Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution
+    Explorer "Package and Publish" context menu entry to be enabled for this project even if
+    the Windows App SDK Nuget package has not yet been restored.
+  -->
+  <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
+    <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
+  </PropertyGroup>
+
+  <!-- Publish Properties -->
+	<PropertyGroup>
+		<PublishReadyToRun Condition="'$(Configuration)' == 'Debug'">False</PublishReadyToRun>
+		<PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">True</PublishReadyToRun>
+		<PublishTrimmed Condition="'$(Configuration)' == 'Debug'">False</PublishTrimmed>
+		<PublishTrimmed Condition="'$(Configuration)' != 'Debug'">True</PublishTrimmed>
+		<AssemblyName>Anime Girls Downloader</AssemblyName>
+		<ApplicationIcon>Assets\icon.ico</ApplicationIcon>
+		<PackageIcon>icon.png</PackageIcon>
+		<Version>1.0.0</Version>
+		<Authors>Kafuu Miaki</Authors>
+		<Copyright>Kafuu Miaki</Copyright>
+		<Description>Anime Girls Downloader</Description>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	</PropertyGroup>
+	<ItemGroup>
+		<Content Remove="Assets\apple-touch-icon.png" />
+		<Content Remove="Assets\avatar.png" />
+		<Content Remove="Assets\github.ico" />
+		<Content Remove="Assets\icon.ico" />
+		<Content Remove="Assets\icon.png" />
+		<Content Remove="Strings\en-US\Resources.resw" />
+		<Content Remove="Strings\ja-JP\Resources.resw" />
+		<Content Remove="Strings\zh-CN\Resources.resw" />
+	</ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Include="Assets\apple-touch-icon.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</EmbeddedResource>
+		<EmbeddedResource Include="Assets\avatar.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</EmbeddedResource>
+		<EmbeddedResource Include="Assets\github.ico">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</EmbeddedResource>
+		<EmbeddedResource Include="Assets\icon.ico">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</EmbeddedResource>
+		<EmbeddedResource Include="Assets\icon.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</EmbeddedResource>
+	</ItemGroup>
+	<ItemGroup>
+		<PRIResource Update="Strings\en-US\Resources.resw">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</PRIResource>
+	</ItemGroup>
+	<ItemGroup>
+		<PRIResource Update="Strings\ja-JP\Resources.resw">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</PRIResource>
+	</ItemGroup>
+	<ItemGroup>
+		<PRIResource Update="Strings\zh-CN\Resources.resw">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</PRIResource>
+	</ItemGroup>
+</Project>
