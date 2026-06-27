@@ -79,7 +79,6 @@
 
     <Style x:Key="TextButton" TargetType="Button">
         <Setter Property="CornerRadius" Value="15" />
-        <Setter Property="Width" Value="80" />
         <Setter Property="Height" Value="40" />
         <Setter Property="HorizontalAlignment" Value="Center" />
         <Setter Property="VerticalAlignment" Value="Center" />
@@ -91,6 +90,7 @@
                 <ControlTemplate TargetType="Button">
                     <Border
                         x:Name="RootBorder"
+                        Padding="20,0,20,0"
                         Background="{TemplateBinding Background}"
                         BorderBrush="{TemplateBinding BorderBrush}"
                         BorderThickness="{TemplateBinding BorderThickness}"

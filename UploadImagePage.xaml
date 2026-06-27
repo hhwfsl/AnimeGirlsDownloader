@@ -51,7 +51,7 @@
             <AutoSuggestBox
                 x:Name="TagAutoSuggestBox"
                 x:Uid="Tag_AutoSuggestBox"
-                Width="200"
+                Width="300"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 QuerySubmitted="TagAutoSuggestBox_QuerySubmitted"
@@ -115,6 +115,7 @@
                 <TextBlock x:Uid="CreatorName_TextBlock" VerticalAlignment="Center" />
                 <TextBox
                     x:Name="CreatorNameTextBox"
+                    Width="300"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Center" />
             </StackPanel>
