@@ -38,7 +38,7 @@ namespace AnimeGirlsDownloader
             }
             catch (Exception e)
             {
-                AppLogger.LogError(e.Message);
+                AppLogger.LogErrorWithInfoBar(e.Message);
                 ErrorHandler?.Invoke(e.Message);
                 return false;
             }
@@ -68,7 +68,7 @@ namespace AnimeGirlsDownloader
             }
             catch (Exception e)
             {
-                AppLogger.LogError(e.Message);
+                AppLogger.LogErrorWithInfoBar(e.Message);
                 ErrorHandler?.Invoke(e.Message);
                 return false;
             }

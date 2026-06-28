@@ -212,8 +212,8 @@
             </Grid>
             <Grid x:Name="InfoBarContainerGrid" Grid.ColumnSpan="2">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="4*" />
                     <ColumnDefinition Width="6*" />
+                    <ColumnDefinition Width="4*" />
                 </Grid.ColumnDefinitions>
                 <Grid x:Name="InfoBarGrid" Grid.Column="1" />
             </Grid>

@@ -155,7 +155,7 @@ namespace AnimeGirlsDownloader
                 }
                 catch (Exception ex)
                 {
-                    AppLogger.LogError(ex.Message);
+                    AppLogger.LogErrorWithInfoBar(ex.Message);
                 }
                 finally
                 {
@@ -277,7 +277,7 @@ namespace AnimeGirlsDownloader
             }
             _isUploading = false;
             string message = AppResourceLoader.GetString("Info_UploadImagePage_BatchUpload_1");
-            AppLogger.LogInfoWithInfoBar(string.Format(message,totalFileCount,successFileCount,totalFileCount-successFileCount));
+            AppLogger.LogInfoWithInfoBar(string.Format(message,totalFileCount,successFileCount,totalFileCount-successFileCount), Enums.InfoBarInfoType.Manually);
         }
     }
 }

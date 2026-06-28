@@ -155,7 +155,7 @@ namespace AnimeGirlsDownloader
             string selectedItem = LanguageListComboBox.SelectedItem.ToString() ?? string.Empty;
             if (string.IsNullOrEmpty(selectedItem))
             {
-                AppLogger.LogError(AppResourceLoader.GetString("Error_SettingPage_LanguageListComboBoxSelectionChanged_1"));
+                AppLogger.LogErrorWithInfoBar(AppResourceLoader.GetString("Error_SettingPage_LanguageListComboBoxSelectionChanged_1"));
                 return;
             }
             string languageCode = LanguageMap.SimpleToFull(LanguageMap.DisplayToSimple(selectedItem));

@@ -18,6 +18,7 @@ using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
 using Windows.Storage.Streams;
 using Windows.System;
+using Windows.UI;
 
 
 namespace AnimeGirlsDownloader
@@ -194,6 +195,14 @@ namespace AnimeGirlsDownloader
             infoBar.IsClosable = true;
             infoBar.HorizontalAlignment = HorizontalAlignment.Right;
             infoBar.VerticalAlignment = VerticalAlignment.Bottom;
+            infoBar.Background = severityLevel switch
+            {
+                InfoBarSeverity.Informational => new Microsoft.UI.Xaml.Media.SolidColorBrush(Colors.LightBlue),
+                InfoBarSeverity.Success => new Microsoft.UI.Xaml.Media.SolidColorBrush(Colors.LightGreen),
+                InfoBarSeverity.Warning => new Microsoft.UI.Xaml.Media.SolidColorBrush(Colors.LightGoldenrodYellow),
+                InfoBarSeverity.Error => new Microsoft.UI.Xaml.Media.SolidColorBrush(Colors.LightCoral),
+                _ => new Microsoft.UI.Xaml.Media.SolidColorBrush(Colors.LightGray),
+            };
             infoBar.Transitions = new Microsoft.UI.Xaml.Media.Animation.TransitionCollection
             {
                 new Microsoft.UI.Xaml.Media.Animation.EntranceThemeTransition(),
@@ -210,6 +219,15 @@ namespace AnimeGirlsDownloader
             infoBar.IsClosable = true;
             infoBar.HorizontalAlignment = HorizontalAlignment.Right;
             infoBar.VerticalAlignment = VerticalAlignment.Bottom;
+            infoBar.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Colors.Black);
+            infoBar.Background = severityLevel switch
+            {
+                InfoBarSeverity.Informational => new Microsoft.UI.Xaml.Media.SolidColorBrush(Color.FromArgb(255, 0, 162, 255)),
+                InfoBarSeverity.Success => new Microsoft.UI.Xaml.Media.SolidColorBrush(Color.FromArgb(255, 0, 202, 78)),
+                InfoBarSeverity.Warning => new Microsoft.UI.Xaml.Media.SolidColorBrush(Color.FromArgb(255, 255, 189, 68)),
+                InfoBarSeverity.Error => new Microsoft.UI.Xaml.Media.SolidColorBrush(Color.FromArgb(255, 255, 96, 92)),
+                _ => new Microsoft.UI.Xaml.Media.SolidColorBrush(Color.FromArgb(255, 0, 162, 255)),
+            };
             infoBar.Transitions = new Microsoft.UI.Xaml.Media.Animation.TransitionCollection
             {
                 new Microsoft.UI.Xaml.Media.Animation.EntranceThemeTransition(),
@@ -223,7 +241,7 @@ namespace AnimeGirlsDownloader
         {
             if (bytes == null)
             {
-                AppLogger.LogError(AppResourceLoader.GetString("Error_MainWindow_BytesToBitmapImage_1"));
+                AppLogger.LogErrorWithInfoBar(AppResourceLoader.GetString("Error_MainWindow_BytesToBitmapImage_1"));
                 return;
             }
             BitmapImage bitmapImage = new BitmapImage();
@@ -324,16 +342,17 @@ namespace AnimeGirlsDownloader
             bool isFixedSavingPath = _settingService.GetSettings().IsEnableFixedSavingPath;
             if (_imageBytes == null)
             {
-                AppLogger.LogError(AppResourceLoader.GetString("Error_MainWindow_SaveImage_1"));
+                AppLogger.LogErrorWithInfoBar(AppResourceLoader.GetString("Error_MainWindow_SaveImage_1"));
                 return;
             }
             if (!isFixedSavingPath)
             {
                 StorageFolder? folder = await _fileService.PickFolderAsync();
-                if (folder != null)
+                if (folder == null)
                 {
-                    savingPath = folder.Path;
+                    return;
                 }
+                savingPath = folder.Path;
             }
             savingPath = Path.Combine(savingPath, $"{_imageId}.png");
             try
@@ -342,7 +361,7 @@ namespace AnimeGirlsDownloader
             }
             catch (Exception e)
             {
-                AppLogger.LogError(e.Message);
+                AppLogger.LogErrorWithInfoBar(e.Message);
             }
             AppLogger.LogInfo($"{AppResourceLoader.GetString("Info_MainWindow_SaveImage_1")}{savingPath}");
             AddErrorAndWarningMessageToQueue(InfoBarSeverity.Success, AppResourceLoader.GetString("Success_MainWindow_SaveImage_1"), InfoBarInfoType.Auto);
@@ -351,7 +370,7 @@ namespace AnimeGirlsDownloader
         {
             if (_imageBytes == null || _imageBytes.Length <= 0)
             {
-                AppLogger.LogError(AppResourceLoader.GetString("Error_MainWindow_CopyImageToClipBoard_1"));
+                AppLogger.LogErrorWithInfoBar(AppResourceLoader.GetString("Error_MainWindow_CopyImageToClipBoard_1"));
                 return;
             }
             var ms = new InMemoryRandomAccessStream();
@@ -428,7 +447,7 @@ namespace AnimeGirlsDownloader
             string path = _settingService.GetSettings().SavingPath ?? string.Empty;
             if (string.IsNullOrEmpty(path))
             {
-                AppLogger.LogError(AppResourceLoader.GetString("Error_MainWindow_OpenSavingPathButtonClick_1"));
+                AppLogger.LogErrorWithInfoBar(AppResourceLoader.GetString("Error_MainWindow_OpenSavingPathButtonClick_1"));
                 return;
             }
             if (!Directory.Exists(path))
