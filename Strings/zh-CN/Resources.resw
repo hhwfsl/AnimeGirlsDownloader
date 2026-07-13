@@ -327,4 +327,10 @@
   <data name="Error_MainWindow_CopyImageLinkToClipBoard_1" xml:space="preserve">
     <value>复制图片链接失败喵~</value>
   </data>
+  <data name="Warning_MainWindow_InitializeLogin_1" xml:space="preserve">
+    <value>登录已过期，请重新登陆喵~</value>
+  </data>
+  <data name="Success_MainWindow_InitializeLogin_1" xml:space="preserve">
+    <value>"{0}"登录成功喵~</value>
+  </data>
 </root>

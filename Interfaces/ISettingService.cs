@@ -21,12 +21,12 @@ namespace AnimeGirlsDownloader.Interfaces
 
         public ISettingService SetIsEnableFixedSavingPath(bool isEnableFixedSavingPath);
 
-        public ISettingService SetSavingPath(string savingPath);
+        public ISettingService SetSavingPath(string? savingPath);
         public ISettingService SetLanguage(string language);
         public ISettingService SetUserName(string userName);
         public ISettingService SetUserAvatarPath(string avatarPath);
-        public ISettingService SetLoggedUserName(string loggedUserName);
-        public ISettingService SetLoggedUserPassword(string password);
+        public ISettingService SetLoggedUserName(string? loggedUserName);
+        //public ISettingService SetLoggedUserPassword(string password);
         public string SetDefaultUserNameWithSaving();
         public void ResizeWindowToStandardSize();
 

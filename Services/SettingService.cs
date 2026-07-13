@@ -132,11 +132,6 @@ namespace AnimeGirlsDownloader.Services
             _settings.LoggedUserName = loggedUserName;
             return this;
         }
-        public ISettingService SetLoggedUserPassword(string password)
-        {
-            _settings.LoggedUserPassword = password;
-            return this;
-        }
 
         /// <summary>
         /// Resize window to standard size.

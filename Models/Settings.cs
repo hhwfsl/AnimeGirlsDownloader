@@ -25,7 +25,6 @@ namespace AnimeGirlsDownloader.Models
 
         // Logged user settings
         public string? LoggedUserName { get; set; }
-        public string? LoggedUserPassword { get; set; }
     }
 
     [JsonSourceGenerationOptions(WriteIndented = true)]

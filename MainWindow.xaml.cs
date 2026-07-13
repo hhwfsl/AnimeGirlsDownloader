@@ -102,6 +102,7 @@ namespace AnimeGirlsDownloader
             InitializeWindowSize();
             InitializeWindowPosition();
             InitializeWindowTheme();
+            InitializeLogin();
         }
         /// <summary>
         /// Initialize window position to center of the screen.
@@ -137,6 +138,21 @@ namespace AnimeGirlsDownloader
         {
             Settings settings = _settingService.GetSettings();
             MainGrid.RequestedTheme = settings.AppTheme;
+        }
+        private async void InitializeLogin()
+        {
+            AccountAuth accountAuth = new AccountAuth();
+            bool isLoggingSuccess = await accountAuth.LoginWithToken();
+            if(!isLoggingSuccess)
+            {
+                _settingService.SetLoggedUserName(null).SaveSetting();
+                AppLogger.LogWarningWithInfoBar(AppResourceLoader.GetString("Warning_MainWindow_InitializeLogin_1"), InfoBarInfoType.Auto);
+            }
+            else
+            {
+                string info = string.Format(AppResourceLoader.GetString("Success_MainWindow_InitializeLogin_1"), _settingService.GetSettings().LoggedUserName);
+                AppLogger.LogSuccessWithInfoBar(info, InfoBarInfoType.Auto);
+            }
         }
         private void ResizeWindowToStandardSize()
         {

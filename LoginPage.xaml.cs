@@ -6,13 +6,13 @@ namespace AnimeGirlsDownloader
     public sealed partial class LoginPage : Page
     {
         private AccountAuth _accountAuth = new AccountAuth();
-        private Action<string,string>? _afterLogin;
+        private Action<string>? _afterLogin;
         public LoginPage()
         {
             InitializeComponent();
             _accountAuth.Initialize(ErrorHandler);
         }
-        public void Initialize(Action<string, string> afterLogin)
+        public void Initialize(Action<string> afterLogin)
         {
             _afterLogin = afterLogin;
         }
@@ -40,7 +40,7 @@ namespace AnimeGirlsDownloader
                 LoginPageTipTeachingTip.IsOpen = true;
                 return;
             }
-            _afterLogin?.Invoke(userName, password);
+            _afterLogin?.Invoke(userName);
             LoginPageTipTeachingTip.Title = AppResourceLoader.GetString("LoginPageSuccess_TeachingTip_Title");
             LoginPageTipTeachingTip.Subtitle = AppResourceLoader.GetString("LoginPageSuccess_TeachingTip_Subtitle_Login");
             LoginPageTipTeachingTip.IsOpen = true;

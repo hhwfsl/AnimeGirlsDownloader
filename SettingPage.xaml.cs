@@ -83,8 +83,7 @@ namespace AnimeGirlsDownloader
         {
             LoggedStackPanel.Visibility = Microsoft.UI.Xaml.Visibility.Collapsed;
             string? loggedUserName = _settings.LoggedUserName;
-            string? loggedUserPassword = _settings.LoggedUserPassword;
-            if(string.IsNullOrEmpty(loggedUserName) || string.IsNullOrEmpty(loggedUserPassword))
+            if(string.IsNullOrEmpty(loggedUserName))
             {
                 return;
             }
@@ -92,11 +91,10 @@ namespace AnimeGirlsDownloader
             LoggedStackPanel.Visibility = Microsoft.UI.Xaml.Visibility.Visible;
             LoginButton.Visibility = Microsoft.UI.Xaml.Visibility.Collapsed;
         }
-        private void AfterLoginHandler(string userName, string password)
+        private void AfterLoginHandler(string userName)
         {
             LoggedAccountNameTextBlock.Text = userName;
             _settings.LoggedUserName = userName;
-            _settings.LoggedUserPassword = password;
             _settingService.SaveSetting(_settings);
             InitializeLogin();
         }
@@ -232,7 +230,6 @@ namespace AnimeGirlsDownloader
         private void LogoutButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
             _settings.LoggedUserName = null;
-            _settings.LoggedUserPassword = null;
             _settingService.SaveSetting(_settings);
             if(File.Exists(AppConsts.AuthFilePath))
             {

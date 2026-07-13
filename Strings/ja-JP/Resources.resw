@@ -327,4 +327,10 @@
   <data name="Error_MainWindow_CopyImageLinkToClipBoard_1" xml:space="preserve">
     <value>画像のリンクをコピーできなかったニャ〜</value>
   </data>
+  <data name="Warning_MainWindow_InitializeLogin_1" xml:space="preserve">
+    <value>ログインの有効期限が切れました、もう一度ログインしてニャ〜</value>
+  </data>
+  <data name="Success_MainWindow_InitializeLogin_1" xml:space="preserve">
+    <value>{0}ログイン成功にゃ〜</value>
+  </data>
 </root>

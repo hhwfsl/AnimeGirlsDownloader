@@ -327,4 +327,10 @@
   <data name="Error_MainWindow_CopyImageLinkToClipBoard_1" xml:space="preserve">
     <value>Failed to copy image link, meow~</value>
   </data>
+  <data name="Warning_MainWindow_InitializeLogin_1" xml:space="preserve">
+    <value>Login has expired, please log in again meow~</value>
+  </data>
+  <data name="Success_MainWindow_InitializeLogin_1" xml:space="preserve">
+    <value>"{0}" logged in successfully, meow~</value>
+  </data>
 </root>
