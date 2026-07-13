@@ -93,10 +93,6 @@
                 Grid.Column="0"
                 Padding="10">
                 <Grid x:Name="DisplayImageGrid">
-                    <!--<Grid.RowDefinitions>
-                        <RowDefinition Height="4*" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>-->
                     <Image
                         x:Name="DisplayImage"
                         HorizontalAlignment="Center"
@@ -109,42 +105,14 @@
                                     x:Uid="CopyImage_MenuFlyoutItem"
                                     Click="CopyImageMenuFlyoutItem_Click"
                                     Icon="Copy" />
+                                <MenuFlyoutItem
+                                    x:Name="CopyImageLinkMenuFlyoutItem"
+                                    x:Uid="CopyImageLink_MenuFlyoutItem"
+                                    Click="CopyImageLinkMenuFlyoutItem_Click"
+                                    Icon="Link" />
                             </MenuFlyout>
                         </Image.ContextFlyout>
                     </Image>
-                    <!--<StackPanel
-                        Grid.Row="1"
-                        Margin="0,5,0,0"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        Orientation="Vertical"
-                        Spacing="3">
-                        <StackPanel
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            Orientation="Horizontal"
-                            Spacing="5">
-                            <TextBlock
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                FontSize="16"
-                                FontWeight="SemiBold"
-                                Text="Id: " />
-                            <TextBlock
-                                x:Name="ImageIdTextBlock"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                FontSize="16"
-                                FontWeight="SemiBold" />
-                        </StackPanel>
-                        <toolkit:WrapPanel
-                            x:Name="TagContainer"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            Orientation="Horizontal"
-                            VerticalSpacing="3" />
-                    </StackPanel>-->
-
                 </Grid>
                 <ProgressRing
                     x:Name="ImageLoadingProgressRing"

@@ -23,7 +23,7 @@ namespace AnimeGirlsDownloader
             using HttpClient client = new HttpClient();
             client.Timeout = _timeout;
             client.DefaultRequestHeaders.UserAgent.ParseAdd(AppConsts.AppUserAgent);
-            string url = $"{AppConsts.AnimeGirlApiEndpoint}auth/login";
+            string url = $"{AppConsts.AnimeGirlsApiEndpoint}auth/login";
             var payload = new LoginRequest { UserName = username, Password = password };
             var content = new StringContent(JsonSerializer.Serialize(payload,LoginRequestContext.Default.LoginRequest), Encoding.UTF8, "application/json");
             try
@@ -52,7 +52,7 @@ namespace AnimeGirlsDownloader
             using HttpClient client = new HttpClient();
             client.Timeout = _timeout;
             client.DefaultRequestHeaders.UserAgent.ParseAdd(AppConsts.AppUserAgent);
-            string url = $"{AppConsts.AnimeGirlApiEndpoint}auth/register";
+            string url = $"{AppConsts.AnimeGirlsApiEndpoint}auth/register";
             var payload = new RegisterRequest { UserName = username, Password = password };
             var content = new StringContent(JsonSerializer.Serialize(payload, RegisterRequestContext.Default.RegisterRequest), Encoding.UTF8, "application/json");
             try

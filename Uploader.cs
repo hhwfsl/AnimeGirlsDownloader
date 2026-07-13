@@ -33,7 +33,7 @@ namespace AnimeGirlsDownloader
                 string token = await File.ReadAllTextAsync(AppConsts.AuthFilePath);
                 client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
                 client.DefaultRequestHeaders.UserAgent.ParseAdd(AppConsts.AppUserAgent);
-                string url = $"{AppConsts.AnimeGirlApiEndpoint}image/upload";
+                string url = $"{AppConsts.AnimeGirlsApiEndpoint}image/upload";
                 var payload = JsonSerializer.Serialize<UploadImageRequest>(request,UploadImageRequestContext.Default.UploadImageRequest);
                 var content = new StringContent(payload, Encoding.UTF8, "application/json");
                 var response = await client.PostAsync(url, content);
@@ -63,7 +63,7 @@ namespace AnimeGirlsDownloader
                 string token = await File.ReadAllTextAsync(AppConsts.AuthFilePath);
                 client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer",token);
                 client.DefaultRequestHeaders.UserAgent.ParseAdd(AppConsts.AppUserAgent);
-                string url = $"{AppConsts.AnimeGirlApiEndpoint}image/tag/fulltags";
+                string url = $"{AppConsts.AnimeGirlsApiEndpoint}image/tag/fulltags";
                 var payload = JsonSerializer.Serialize<TagRequest>(request, TagRequestContext.Default.TagRequest);
                 var content = new StringContent(payload, Encoding.UTF8, "application/json");
                 var response = await client.PostAsync(url,content);

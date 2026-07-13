@@ -160,7 +160,7 @@
     <value>リポジトリのアドレス</value>
   </data>
   <data name="CopyImage_MenuFlyoutItem.Text" xml:space="preserve">
-    <value>コピー</value>
+    <value>画像をコピーする</value>
   </data>
   <data name="Info_Downloader_GetImageBytesById_1" xml:space="preserve">
     <value>画像IDに基づいて画像データの取得を開始します。Id=</value>
@@ -196,7 +196,7 @@
     <value>選択された言語が空ですにゃ〜</value>
   </data>
   <data name="Success_MainWindow_CopyImageToClipBoard_1" xml:space="preserve">
-    <value>コピー成功ニャ〜</value>
+    <value>画像をコピーしたにゃ〜</value>
   </data>
   <data name="EditUserAvatar_MenuFlyoutItem.Text" xml:space="preserve">
     <value>プロフィール画像を変更する</value>
@@ -314,5 +314,17 @@
   </data>
   <data name="IsEnableAiGenerated_CheckBox_Indeterminate" xml:space="preserve">
     <value>AIを許可：AIのみ</value>
+  </data>
+  <data name="CopyImageLink_MenuFlyoutItem.Text" xml:space="preserve">
+    <value>画像リンクをコピー</value>
+  </data>
+  <data name="Success_MainWindow_CopyImageLinkToClipBoard_1" xml:space="preserve">
+    <value>リンクをコピーしたニャ〜</value>
+  </data>
+  <data name="Error_MainWindow_CopyImageToClipBoard_2" xml:space="preserve">
+    <value>画像のコピーに失敗したにゃ〜</value>
+  </data>
+  <data name="Error_MainWindow_CopyImageLinkToClipBoard_1" xml:space="preserve">
+    <value>画像のリンクをコピーできなかったニャ〜</value>
   </data>
 </root>

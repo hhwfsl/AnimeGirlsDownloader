@@ -1,5 +1,4 @@
 ﻿using AnimeGirlsDownloader.Enums;
-using AnimeGirlsDownloader.Interfaces;
 using AnimeGirlsDownloader.Models;
 using AnimeGirlsDownloader.Requests;
 using AnimeGirlsDownloader.Responses;
@@ -34,7 +33,7 @@ namespace AnimeGirlsDownloader
             using HttpClient client = new HttpClient();
             client.Timeout = _timeout;
             client.DefaultRequestHeaders.UserAgent.ParseAdd(AppConsts.AppUserAgent);
-            string url = $"{AppConsts.AnimeGirlApiEndpoint}image/id";
+            string url = $"{AppConsts.AnimeGirlsApiEndpoint}image/id";
             GetImageRequest request = new GetImageRequest
             {
                 Id = imageId,
@@ -73,7 +72,7 @@ namespace AnimeGirlsDownloader
             using HttpClient client = new HttpClient();
             client.Timeout = _timeout;
             client.DefaultRequestHeaders.UserAgent.ParseAdd(AppConsts.AppUserAgent);
-            string url = $"{AppConsts.AnimeGirlApiEndpoint}image/random";
+            string url = $"{AppConsts.AnimeGirlsApiEndpoint}image/random";
             GetImageRequest request = new GetImageRequest
             {
                 Tags = tags,

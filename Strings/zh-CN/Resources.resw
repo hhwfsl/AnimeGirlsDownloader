@@ -160,7 +160,7 @@
     <value>仓库地址</value>
   </data>
   <data name="CopyImage_MenuFlyoutItem.Text" xml:space="preserve">
-    <value>复制</value>
+    <value>复制图片</value>
   </data>
   <data name="Info_Downloader_GetImageBytesById_1" xml:space="preserve">
     <value>开始根据图片Id获取图片数据。Id=</value>
@@ -196,7 +196,7 @@
     <value>选定的语言为空喵~</value>
   </data>
   <data name="Success_MainWindow_CopyImageToClipBoard_1" xml:space="preserve">
-    <value>复制成功喵~</value>
+    <value>复制图片成功喵~</value>
   </data>
   <data name="EditUserAvatar_MenuFlyoutItem.Text" xml:space="preserve">
     <value>修改头像</value>
@@ -314,5 +314,17 @@
   </data>
   <data name="IsEnableAiGenerated_CheckBox_Indeterminate" xml:space="preserve">
     <value>是否允许AI：仅AI</value>
+  </data>
+  <data name="CopyImageLink_MenuFlyoutItem.Text" xml:space="preserve">
+    <value>复制图片链接</value>
+  </data>
+  <data name="Success_MainWindow_CopyImageLinkToClipBoard_1" xml:space="preserve">
+    <value>复制链接成功喵~</value>
+  </data>
+  <data name="Error_MainWindow_CopyImageToClipBoard_2" xml:space="preserve">
+    <value>复制图片失败喵~</value>
+  </data>
+  <data name="Error_MainWindow_CopyImageLinkToClipBoard_1" xml:space="preserve">
+    <value>复制图片链接失败喵~</value>
   </data>
 </root>

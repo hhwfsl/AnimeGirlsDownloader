@@ -160,7 +160,7 @@
     <value>Repository address</value>
   </data>
   <data name="CopyImage_MenuFlyoutItem.Text" xml:space="preserve">
-    <value>Copy</value>
+    <value>Copy Image</value>
   </data>
   <data name="Info_Downloader_GetImageBytesById_1" xml:space="preserve">
     <value>Begin to get image bytes by id. Id=</value>
@@ -196,7 +196,7 @@
     <value>The selected language is empty, meow~</value>
   </data>
   <data name="Success_MainWindow_CopyImageToClipBoard_1" xml:space="preserve">
-    <value>Copy successful, meow~</value>
+    <value>Image copyied successful, meow~</value>
   </data>
   <data name="EditUserAvatar_MenuFlyoutItem.Text" xml:space="preserve">
     <value>Edit avatar</value>
@@ -314,5 +314,17 @@
   </data>
   <data name="IsEnableAiGenerated_CheckBox_Indeterminate" xml:space="preserve">
     <value>Allow AI: AI Only</value>
+  </data>
+  <data name="CopyImageLink_MenuFlyoutItem.Text" xml:space="preserve">
+    <value>Copy Image Link</value>
+  </data>
+  <data name="Success_MainWindow_CopyImageLinkToClipBoard_1" xml:space="preserve">
+    <value>Link copied successfully, meow~</value>
+  </data>
+  <data name="Error_MainWindow_CopyImageToClipBoard_2" xml:space="preserve">
+    <value>Failed to copy the image, meow~</value>
+  </data>
+  <data name="Error_MainWindow_CopyImageLinkToClipBoard_1" xml:space="preserve">
+    <value>Failed to copy image link, meow~</value>
   </data>
 </root>

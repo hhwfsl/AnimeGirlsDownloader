@@ -67,7 +67,7 @@ namespace AnimeGirlsDownloader
             DisplayImageGrid.Visibility = Visibility.Visible;
             ImageLoadingProgressRing.IsActive = false;
             ImageLoadingProgressRing.Visibility = Visibility.Collapsed;
-            AppLogger.Initialize(AddErrorAndWarningMessageToQueue);
+            AppLogger.Initialize(AddMessageToQueue);
 
             this.Closed += WindowClosed;
 
@@ -149,7 +149,7 @@ namespace AnimeGirlsDownloader
                 .SaveSetting();
             AppWindow.Resize(new Windows.Graphics.SizeInt32(_windowWidth, _windowHeight));
         }
-        private void AddErrorAndWarningMessageToQueue(InfoBarSeverity status, string message, InfoBarInfoType type)
+        private void AddMessageToQueue(InfoBarSeverity status, string message, InfoBarInfoType type)
         {
             InfoMessage infoMessage = new InfoMessage
             {
@@ -267,7 +267,7 @@ namespace AnimeGirlsDownloader
         {
             if (_isGettingImage)
             {
-                AddErrorAndWarningMessageToQueue(InfoBarSeverity.Informational, AppResourceLoader.GetString("Error_MainWindow_GetRandomImage_1"), InfoBarInfoType.Auto);
+                AppLogger.LogInfoWithInfoBar(AppResourceLoader.GetString("Error_MainWindow_GetRandomImage_1"), InfoBarInfoType.Auto);
                 return;
             }
             _isGettingImage = true;
@@ -296,7 +296,7 @@ namespace AnimeGirlsDownloader
         {
             if (_isGettingImage)
             {
-                AddErrorAndWarningMessageToQueue(InfoBarSeverity.Informational, AppResourceLoader.GetString("Error_MainWindow_GetRandomImage_1"), InfoBarInfoType.Auto);
+                AppLogger.LogInfoWithInfoBar(AppResourceLoader.GetString("Error_MainWindow_GetRandomImage_1"), InfoBarInfoType.Auto);
                 return;
             }
             _isGettingImage = true;
@@ -312,6 +312,10 @@ namespace AnimeGirlsDownloader
             DisplayImageGrid.Visibility = Visibility.Visible;
             _isGettingImage = false;
         }
+        private void RefreshImage(string query)
+        {
+            ProcessTagsInputAndGetImage(query);
+        }
         private void ProcessTagsInputAndGetImage(string? query)
         {
             if (string.IsNullOrEmpty(query))
@@ -326,6 +330,7 @@ namespace AnimeGirlsDownloader
                 {
                     long id = Convert.ToInt64(tagStrings[0]);
                     GetImageById(id);
+                    return;
                 }
                 catch { }
             }
@@ -364,7 +369,7 @@ namespace AnimeGirlsDownloader
                 AppLogger.LogErrorWithInfoBar(e.Message);
             }
             AppLogger.LogInfo($"{AppResourceLoader.GetString("Info_MainWindow_SaveImage_1")}{savingPath}");
-            AddErrorAndWarningMessageToQueue(InfoBarSeverity.Success, AppResourceLoader.GetString("Success_MainWindow_SaveImage_1"), InfoBarInfoType.Auto);
+            AppLogger.LogSuccessWithInfoBar(AppResourceLoader.GetString("Success_MainWindow_SaveImage_1"), InfoBarInfoType.Auto);
         }
         private async Task CopyImageToClipBoard()
         {
@@ -374,18 +379,43 @@ namespace AnimeGirlsDownloader
                 return;
             }
             var ms = new InMemoryRandomAccessStream();
-            using (DataWriter writer = new DataWriter(ms.GetOutputStreamAt(0)))
+            try
             {
-                writer.WriteBytes(_imageBytes);
-                await writer.StoreAsync();
+                using (DataWriter writer = new DataWriter(ms.GetOutputStreamAt(0)))
+                {
+                    writer.WriteBytes(_imageBytes);
+                    await writer.StoreAsync();
+                }
+                var streamReference = RandomAccessStreamReference.CreateFromStream(ms);
+                var dataPackage = new DataPackage();
+                dataPackage.SetBitmap(streamReference);
+                Clipboard.SetContent(dataPackage);
+                Clipboard.Flush();
+                ms.Dispose();
+                AppLogger.LogSuccessWithInfoBar(AppResourceLoader.GetString("Success_MainWindow_CopyImageToClipBoard_1"), InfoBarInfoType.Auto);
             }
-            var streamReference = RandomAccessStreamReference.CreateFromStream(ms);
-            var dataPackage = new DataPackage();
-            dataPackage.SetBitmap(streamReference);
-            Clipboard.SetContent(dataPackage);
-            Clipboard.Flush();
-            ms.Dispose();
-            AddErrorAndWarningMessageToQueue(InfoBarSeverity.Success, AppResourceLoader.GetString("Success_MainWindow_CopyImageToClipBoard_1"), InfoBarInfoType.Auto);
+            catch
+            {
+                ms.Dispose();
+                AppLogger.LogErrorWithInfoBar(AppResourceLoader.GetString("Error_MainWindow_CopyImageToClipBoard_2"));
+            }
+
+        }
+        private void CopyImageLinkToClipboard()
+        {
+            try
+            {
+                string imageLink = $"{AppConsts.AnimeGirlsImageIdLinkEndpoint}{_imageId}";
+                var dataPackage = new DataPackage();
+                dataPackage.SetText(imageLink);
+                Clipboard.SetContent(dataPackage);
+                Clipboard.Flush();
+                AppLogger.LogSuccessWithInfoBar(AppResourceLoader.GetString("Success_MainWindow_CopyImageLinkToClipBoard_1"), InfoBarInfoType.Auto);
+            }
+            catch
+            {
+                AppLogger.LogErrorWithInfoBar(AppResourceLoader.GetString("Error_MainWindow_CopyImageLinkToClipBoard_1"));
+            }
         }
 
         [DllImport("user32.dll")]
@@ -460,7 +490,7 @@ namespace AnimeGirlsDownloader
         private void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
             string query = SearchTagsAutoSuggestBox.Text;
-            ProcessTagsInputAndGetImage(query);
+            RefreshImage(query);
         }
 
         private async void SaveImageButton_Click(object sender, RoutedEventArgs e)
@@ -502,7 +532,12 @@ namespace AnimeGirlsDownloader
         private void SearchTagsAutoSuggestBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
         {
             string query = sender.Text;
-            ProcessTagsInputAndGetImage(query);
+            RefreshImage(query);
+        }
+
+        private void CopyImageLinkMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
+        {
+            CopyImageLinkToClipboard();
         }
     }
 }
