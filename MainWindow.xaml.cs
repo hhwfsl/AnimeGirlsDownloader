@@ -72,6 +72,8 @@ namespace AnimeGirlsDownloader
             this.Closed += WindowClosed;
 
             Task.Run(InfomationInfo);
+
+            InitializeLogin();
         }
         /// <summary>
         /// Save window size when window size changed.
@@ -102,7 +104,7 @@ namespace AnimeGirlsDownloader
             InitializeWindowSize();
             InitializeWindowPosition();
             InitializeWindowTheme();
-            InitializeLogin();
+            
         }
         /// <summary>
         /// Initialize window position to center of the screen.
@@ -505,6 +507,7 @@ namespace AnimeGirlsDownloader
 
         private void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
+            GC.Collect();
             string query = SearchTagsAutoSuggestBox.Text;
             RefreshImage(query);
         }

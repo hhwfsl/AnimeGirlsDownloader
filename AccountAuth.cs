@@ -50,6 +50,10 @@ namespace AnimeGirlsDownloader
         public async Task<bool> LoginWithToken()
         {
             using HttpClient client = new HttpClient();
+            if (!File.Exists(AppConsts.AuthFilePath))
+            {
+                return false;
+            }
             string token = await File.ReadAllTextAsync(AppConsts.AuthFilePath);
             client.Timeout = _timeout;
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);

@@ -106,7 +106,7 @@ namespace AnimeGirlsDownloader.Services
             _settings.IsEnableFixedSavingPath = isEnableFixedSavingPath;
             return this;
         }
-        public ISettingService SetSavingPath(string savingPath)
+        public ISettingService SetSavingPath(string? savingPath)
         {
             _settings.SavingPath = savingPath;
             return this;
@@ -127,7 +127,7 @@ namespace AnimeGirlsDownloader.Services
             _settings.UserAvatarPath = avatarPath;
             return this;
         }
-        public ISettingService SetLoggedUserName(string loggedUserName)
+        public ISettingService SetLoggedUserName(string? loggedUserName)
         {
             _settings.LoggedUserName = loggedUserName;
             return this;
