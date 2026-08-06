@@ -15,6 +15,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
+using Windows.Graphics;
 using Windows.Storage;
 using Windows.Storage.Streams;
 using Windows.System;
@@ -30,6 +31,7 @@ namespace AnimeGirlsDownloader
         private WindowId _windowId;
         private int _windowWidth;
         private int _windowHeight;
+        private SizeInt32 _windowDefaultSize;
 
         // Data
         private Downloader _downloader;
@@ -114,19 +116,20 @@ namespace AnimeGirlsDownloader
             DisplayArea displayArea = DisplayArea.GetFromWindowId(_windowId, DisplayAreaFallback.Primary);
             int x = displayArea.WorkArea.X + (displayArea.WorkArea.Width - AppWindow.Size.Width) / 2;
             int y = displayArea.WorkArea.Y + (displayArea.WorkArea.Height - AppWindow.Size.Height) / 2;
-            AppWindow.Move(new Windows.Graphics.PointInt32(x, y));
+            AppWindow.Move(new PointInt32(x, y));
         }
         /// <summary>
         /// Initialize window size from settings or set to standard size.
         /// </summary>
         private void InitializeWindowSize()
         {
+            _windowDefaultSize = AppWindow.Size;
             Settings settings = _settingService.GetSettings();
             if (settings.WindowWidth != 0 && settings.WindowHeight != 0)
             {
                 _windowWidth = settings.WindowWidth;
                 _windowHeight = settings.WindowHeight;
-                AppWindow.Resize(new Windows.Graphics.SizeInt32(_windowWidth, _windowHeight));
+                AppWindow.Resize(new SizeInt32(_windowWidth, _windowHeight));
             }
             else
             {
@@ -158,14 +161,15 @@ namespace AnimeGirlsDownloader
         }
         private void ResizeWindowToStandardSize()
         {
-            DisplayArea displayArea = DisplayArea.GetFromWindowId(_windowId, DisplayAreaFallback.Primary);
-            _windowWidth = displayArea.WorkArea.Width / 2;
-            _windowHeight = displayArea.WorkArea.Height / 3 * 2;
+            //DisplayArea displayArea = DisplayArea.GetFromWindowId(_windowId, DisplayAreaFallback.Primary);
+            _windowWidth = _windowDefaultSize.Width;
+            _windowHeight = _windowDefaultSize.Height;
             _settingService
-                .SetWindowWidth(_windowWidth)
-                .SetWindowHeight(_windowHeight)
+                .SetWindowWidth(0)
+                .SetWindowHeight(0)
                 .SaveSetting();
-            AppWindow.Resize(new Windows.Graphics.SizeInt32(_windowWidth, _windowHeight));
+            AppWindow.Resize(new SizeInt32(_windowWidth, _windowHeight));
+            InitializeWindowPosition();
         }
         private void AddMessageToQueue(InfoBarSeverity status, string message, InfoBarInfoType type)
         {
