@@ -1,6 +1,6 @@
 # AnimeGirlsDownloader
 
-AnimeGirlsDownloader 是一个基于 WinUI 3 和 .NET 8 的 Windows 图片浏览、下载与上传客户端，与 [AnimeGirlsCollection](https://github.com/hhwfsl/AnimeGirlsCollection) 服务端配套使用。
+AnimeGirlsDownloader 是一个基于 WinUI 3 和 .NET 8 的 Windows 图片浏览、下载与上传客户端。
 
 ## 功能
 
