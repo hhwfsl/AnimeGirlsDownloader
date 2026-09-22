@@ -1,21 +1,13 @@
-﻿using AnimeGirlsDownloader.Enums;
+using AnimeGirlsDownloader.Enums;
 using AnimeGirlsDownloader.Models;
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
 
-namespace AnimeGirlsDownloader.Requests
+namespace AnimeGirlsDownloader.Requests;
+
+public sealed class GetImageRequest
 {
-    public class GetImageRequest
-    {
-        public long? Id { get; set; }
-        public List<Tag>? Tags { get; set; }
-        public ImageType Type { get; set; }
-        public ImageIsAllowAiType IsAllowAiGenerated { get; set; }
-    }
-    [JsonSourceGenerationOptions(WriteIndented = true)]
-    [JsonSerializable(typeof(GetImageRequest))]
-    internal partial class GetImageRequestContext : JsonSerializerContext
-    {
-
-    }
+    public long? Id { get; set; }
+    public List<Tag>? Tags { get; set; }
+    public ImageType Type { get; set; }
+    public ImageIsAllowAiType IsAllowAiGenerated { get; set; }
 }

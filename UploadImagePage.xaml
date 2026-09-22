@@ -3,172 +3,172 @@
     x:Class="AnimeGirlsDownloader.UploadImagePage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="using:AnimeGirlsDownloader"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:AnimeGirlsDownloader.Models"
     xmlns:toolkit="using:CommunityToolkit.WinUI.Controls"
-    xmlns:uc="using:AnimeGirlsDownloader.UserControls"
-    mc:Ignorable="d">
+    xmlns:uc="using:AnimeGirlsDownloader.UserControls">
 
-    <Grid x:Name="UploadPageMainGrid">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
-        <Image
-            x:Name="UploadImage"
-            Grid.Row="0"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
+    <Grid
+        x:Name="UploadPageMainGrid"
+        Padding="16"
+        ColumnSpacing="20">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="3*" />
+            <ColumnDefinition Width="2*" MinWidth="360" />
+        </Grid.ColumnDefinitions>
+
+        <Border
+            Grid.Column="0"
             AllowDrop="True"
-            DragOver="UploadImage_DragOver"
-            Drop="UploadImage_Drop"
-            Stretch="Uniform" />
-        <TextBlock
-            x:Name="DropImageTextBlock"
-            x:Uid="DropImage_TextBlock"
-            Grid.Row="0"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            AllowDrop="True"
-            DragOver="DropImageTextBlock_DragOver"
-            Drop="DropImageTextBlock_Drop"
-            FontSize="18"
-            FontWeight="SemiBold" />
-        <StackPanel
-            Grid.Row="1"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            Orientation="Vertical"
-            Spacing="10">
-            <toolkit:WrapPanel
-                x:Name="TagContainer"
-                Margin="0,10,0,0"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                Orientation="Horizontal"
-                VerticalSpacing="3" />
-            <AutoSuggestBox
-                x:Name="TagAutoSuggestBox"
-                x:Uid="Tag_AutoSuggestBox"
-                Width="300"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                QuerySubmitted="TagAutoSuggestBox_QuerySubmitted"
-                SuggestionChosen="TagAutoSuggestBox_SuggestionChosen"
-                TextChanged="TagAutoSuggestBox_TextChanged" />
-            <StackPanel
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                Orientation="Horizontal"
-                Spacing="40">
-                <Button
-                    x:Name="AddTagButton"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Click="AddTagButton_Click"
-                    Style="{StaticResource TextButton}">
-                    <TextBlock
-                        x:Uid="AddTagButton_TextBlock"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        FontSize="14"
-                        FontWeight="SemiBold" />
-                </Button>
-                <Button
-                    x:Name="RevokeTagButton"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Click="RevokeTagButton_Click"
-                    Style="{StaticResource TextButton}">
-                    <TextBlock
-                        x:Uid="RevokeTagButton_TextBlock"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        FontSize="14"
-                        FontWeight="SemiBold" />
-                </Button>
-            </StackPanel>
-            <StackPanel
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                Orientation="Horizontal"
-                Spacing="40">
-                <CheckBox
-                    x:Name="IsNSFWCheckBox"
-                    x:Uid="IsNSFW_CheckBox"
-                    VerticalAlignment="Center"
-                    Checked="IsNSFWCheckBox_Checked"
-                    Unchecked="IsNSFWCheckBox_Unchecked" />
-                <CheckBox
-                    x:Name="IsAiGenerateCheckBox"
-                    x:Uid="IsAiGenerate_CheckBox"
-                    VerticalAlignment="Center"
-                    Checked="IsAiGenerateCheckBox_Checked"
-                    Unchecked="IsAiGenerateCheckBox_Unchecked" />
-            </StackPanel>
-            <StackPanel
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                Orientation="Horizontal"
-                Spacing="5">
-                <TextBlock x:Uid="CreatorName_TextBlock" VerticalAlignment="Center" />
-                <TextBox
-                    x:Name="CreatorNameTextBox"
-                    Width="300"
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+            BorderThickness="1"
+            CornerRadius="12"
+            DragOver="Preview_DragOver"
+            Drop="Preview_Drop">
+            <Grid>
+                <Image
+                    x:Name="UploadImage"
+                    Margin="12"
                     HorizontalAlignment="Stretch"
-                    VerticalAlignment="Center" />
-            </StackPanel>
-            <StackPanel
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                Orientation="Horizontal"
-                Spacing="40">
-                <Button
-                    x:Name="UploadButton"
-                    Margin="0,0,0,10"
+                    VerticalAlignment="Stretch"
+                    Stretch="Uniform" />
+                <StackPanel
+                    x:Name="PreviewPlaceholder"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    Click="UploadButton_Click"
-                    Style="{StaticResource TextButton}">
+                    Spacing="8">
+                    <FontIcon FontSize="48" Glyph="&#xEB9F;" />
                     <TextBlock
-                        x:Uid="UploadButton_TextBlock"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        FontSize="14"
+                        x:Uid="DropImage_TextBlock"
+                        FontSize="18"
                         FontWeight="SemiBold" />
-                </Button>
-                <Button
-                    x:Name="BatchUploadButton"
-                    Margin="0,0,0,10"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Click="BatchUploadButton_Click"
-                    Style="{StaticResource TextButton}">
                     <TextBlock
-                        x:Uid="BatchUploadButton_TextBlock"
+                        x:Uid="UploadPreviewHint_TextBlock"
                         HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        FontSize="14"
-                        FontWeight="SemiBold" />
-                </Button>
-                <Button
-                    x:Name="CancelUploadButton"
-                    Margin="0,0,0,10"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Click="CancelUploadButton_Click"
-                    Style="{StaticResource TextButton}">
-                    <TextBlock
-                        x:Uid="CancelUploadButton_TextBlock"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        FontSize="14"
-                        FontWeight="SemiBold" />
-                </Button>
-            </StackPanel>
+                        Opacity="0.7" />
+                </StackPanel>
+            </Grid>
+        </Border>
 
-        </StackPanel>
+        <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="14">
+                <Grid>
+                    <TextBlock
+                        x:Uid="UploadSelectedPaths_TextBlock"
+                        VerticalAlignment="Center"
+                        FontSize="20"
+                        FontWeight="SemiBold" />
+                    <Button
+                        x:Name="AddSourcesButton"
+                        x:Uid="UploadAddSources_Button"
+                        HorizontalAlignment="Right">
+                        <Button.Flyout>
+                            <MenuFlyout>
+                                <MenuFlyoutItem
+                                    x:Uid="UploadAddImages_MenuFlyoutItem"
+                                    Click="AddImagesMenuItem_Click"
+                                    Icon="Pictures" />
+                                <MenuFlyoutItem
+                                    x:Uid="UploadAddFolder_MenuFlyoutItem"
+                                    Click="AddFolderMenuItem_Click"
+                                    Icon="Folder" />
+                            </MenuFlyout>
+                        </Button.Flyout>
+                    </Button>
+                </Grid>
+
+                <ListView
+                    x:Name="SelectedSourcesListView"
+                    MinHeight="140"
+                    MaxHeight="240"
+                    ItemsSource="{x:Bind SelectedSources}">
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="models:UploadSourceItem">
+                            <Grid Padding="4" ColumnSpacing="10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <FontIcon VerticalAlignment="Center" Glyph="{x:Bind IconGlyph}" />
+                                <TextBlock
+                                    Grid.Column="1"
+                                    VerticalAlignment="Center"
+                                    Text="{x:Bind Path}"
+                                    TextTrimming="CharacterEllipsis" />
+                                <Button
+                                    x:Uid="UploadRemoveSource_Button"
+                                    Grid.Column="2"
+                                    Click="RemoveSourceButton_Click"
+                                    Tag="{x:Bind}" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+
+                <StackPanel x:Name="TagEditorPanel" Spacing="8">
+                    <TextBlock
+                        x:Uid="UploadSingleImageTags_TextBlock"
+                        FontWeight="SemiBold" />
+                    <toolkit:WrapPanel
+                        x:Name="TagContainer"
+                        Orientation="Horizontal"
+                        VerticalSpacing="3" />
+                    <AutoSuggestBox
+                        x:Name="TagAutoSuggestBox"
+                        x:Uid="Tag_AutoSuggestBox"
+                        QuerySubmitted="TagAutoSuggestBox_QuerySubmitted"
+                        SuggestionChosen="TagAutoSuggestBox_SuggestionChosen"
+                        TextChanged="TagAutoSuggestBox_TextChanged" />
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <Button
+                            x:Name="AddTagButton"
+                            x:Uid="UploadAddTag_Button"
+                            Click="AddTagButton_Click" />
+                        <Button
+                            x:Name="RevokeTagButton"
+                            x:Uid="UploadRemoveLastTag_Button"
+                            Click="RevokeTagButton_Click" />
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Spacing="24">
+                    <CheckBox
+                        x:Name="IsNSFWCheckBox"
+                        x:Uid="IsNSFW_CheckBox"
+                        Checked="IsNSFWCheckBox_Checked"
+                        Unchecked="IsNSFWCheckBox_Unchecked" />
+                    <CheckBox
+                        x:Name="IsAiGenerateCheckBox"
+                        x:Uid="IsAiGenerate_CheckBox"
+                        Checked="IsAiGenerateCheckBox_Checked"
+                        Unchecked="IsAiGenerateCheckBox_Unchecked" />
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock
+                        x:Uid="CreatorName_TextBlock"
+                        VerticalAlignment="Center" />
+                    <TextBox x:Name="CreatorNameTextBox" MinWidth="220" />
+                </StackPanel>
+
+                <StackPanel
+                    HorizontalAlignment="Right"
+                    Orientation="Horizontal"
+                    Spacing="12">
+                    <Button
+                        x:Name="UploadButton"
+                        x:Uid="UploadStart_Button"
+                        Click="UploadButton_Click"
+                        Style="{StaticResource TextButton}" />
+                    <Button
+                        x:Name="CancelUploadButton"
+                        x:Uid="UploadClose_Button"
+                        Click="CancelUploadButton_Click"
+                        Style="{StaticResource TextButton}" />
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+
         <TeachingTip
             x:Name="UploadPageTipTeachingTip"
             x:Uid="UploadPageTip_TeachingTip"

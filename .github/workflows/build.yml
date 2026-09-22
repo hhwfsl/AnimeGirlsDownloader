@@ -1,0 +1,48 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-aot-win-x64:
+    runs-on: windows-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore AnimeGirlsDownloader.csproj -r win-x64 -p:Platform=x64 -p:Configuration=Release
+
+      - name: Build
+        run: dotnet build AnimeGirlsDownloader.csproj -c Release -p:Platform=x64 --no-restore
+
+      - name: Publish Native AOT
+        run: dotnet publish AnimeGirlsDownloader.csproj -c Release -r win-x64 -p:Platform=x64 -p:PublishDir=artifacts\win-x64\ --self-contained true --no-restore
+
+      - name: Verify Native AOT output
+        shell: pwsh
+        run: |
+          $output = "artifacts\win-x64"
+          if (-not (Test-Path "$output\Anime Girls Downloader.exe")) { throw "Application executable is missing." }
+          if (Test-Path "$output\Anime Girls Downloader.dll") { throw "Managed application DLL found; output is not Native AOT." }
+          if (Test-Path "$output\coreclr.dll") { throw "CoreCLR found; output is not Native AOT." }
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AnimeGirlsDownloader-win-x64
+          path: artifacts/win-x64/
+          if-no-files-found: error

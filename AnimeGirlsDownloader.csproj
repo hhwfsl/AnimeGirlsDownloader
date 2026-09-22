@@ -12,13 +12,21 @@
     <WinUISDKReferences>false</WinUISDKReferences>
     <EnableMsixTooling>true</EnableMsixTooling>
     <Nullable>enable</Nullable>
-	  <PublishAot>true</PublishAot>
-	  <PublishSingleFile>false</PublishSingleFile>
-	  <!--<WindowsPackageType>None</WindowsPackageType>-->
-	  <WindowsPackageType>None</WindowsPackageType>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <WindowsPackageType>None</WindowsPackageType>
+    <!-- Keep this unconditional: Windows App SDK evaluates AOT during NuGet restore. -->
+    <PublishAot>true</PublishAot>
+    <PublishSingleFile>false</PublishSingleFile>
+    <!--<SelfContained Condition="'$(Configuration)' == 'Release'">true</SelfContained>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>-->
+    <IsAotCompatible>true</IsAotCompatible>
+    <EnableAotAnalyzer>true</EnableAotAnalyzer>
+    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
   </PropertyGroup>
 	<ItemGroup>
 		<None Remove="LoginPage.xaml" />
+		<None Remove="DownloadPage.xaml" />
 		<None Remove="SettingPage.xaml" />
 		<None Remove="Styles\ButtonResourceDictionary.xaml" />
 		<None Remove="Styles\EllipseResourceDictionary.xaml" />
@@ -47,6 +55,10 @@
     <PackageReference Include="SkiaSharp" Version="3.119.1" />
   </ItemGroup>
 	<ItemGroup>
+		<None Update="CHANGELOG.md">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</None>
 		<None Update="Assets\icon.png">
 			<Pack>True</Pack>
 			<PackagePath>\</PackagePath>
@@ -58,6 +70,9 @@
 		  <Generator>MSBuild:Compile</Generator>
 		</Page>
 		<Page Update="LoginPage.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</Page>
+		<Page Update="DownloadPage.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</Page>
 	</ItemGroup>
@@ -97,8 +112,6 @@
 
   <!-- Publish Properties -->
 	<PropertyGroup>
-		<PublishReadyToRun Condition="'$(Configuration)' == 'Debug'">False</PublishReadyToRun>
-		<PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">True</PublishReadyToRun>
 		<PublishTrimmed Condition="'$(Configuration)' == 'Debug'">False</PublishTrimmed>
 		<PublishTrimmed Condition="'$(Configuration)' != 'Debug'">True</PublishTrimmed>
 		<AssemblyName>Anime Girls Downloader</AssemblyName>
@@ -111,7 +124,6 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	</PropertyGroup>
 	<ItemGroup>
-		<Content Remove="Assets\apple-touch-icon.png" />
 		<Content Remove="Assets\avatar.png" />
 		<Content Remove="Assets\github.ico" />
 		<Content Remove="Assets\icon.ico" />
@@ -121,9 +133,6 @@
 		<Content Remove="Strings\zh-CN\Resources.resw" />
 	</ItemGroup>
 	<ItemGroup>
-		<EmbeddedResource Include="Assets\apple-touch-icon.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</EmbeddedResource>
 		<EmbeddedResource Include="Assets\avatar.png">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</EmbeddedResource>

@@ -1,18 +1,9 @@
-﻿using System.Text.Json.Serialization;
+namespace AnimeGirlsDownloader.Models;
 
-namespace AnimeGirlsDownloader.Models
+public sealed class User
 {
-    public class User
-    {
-        public long Id { get; set; }
-        public required string Name { get; set; }
-        public string? AvatarPath { get; set; }
-        public string? PasswordHash { get; set; }
-    }
-    [JsonSourceGenerationOptions(WriteIndented = true)]
-    [JsonSerializable(typeof(User))]
-    internal partial class UserContext : JsonSerializerContext
-    {
-
-    }
+    public long Id { get; set; }
+    public required string Name { get; set; }
+    public string? AvatarPath { get; set; }
+    public string? PasswordHash { get; set; }
 }

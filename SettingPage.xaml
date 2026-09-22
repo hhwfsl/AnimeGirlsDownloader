@@ -15,6 +15,8 @@
                     <RowDefinition Height="*" />
                     <RowDefinition Height="*" />
                     <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <Ellipse
                     x:Name="UserAvatarEllipse"
@@ -107,6 +109,35 @@
                             FontWeight="SemiBold" />
                     </Button>
                 </StackPanel>
+                <Grid Grid.Row="3">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Border
+                        Grid.Column="1"
+                        Margin="0,5,0,5"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Center"
+                        BorderBrush="{ThemeResource AppBarSeparatorForegroundThemeBrush}"
+                        BorderThickness="0.5" />
+                </Grid>
+                <HyperlinkButton
+                    Grid.Row="4"
+                    HorizontalAlignment="Center"
+                    NavigateUri="https://github.com/hhwfsl/AnimeGirlsDownloader">
+                    <StackPanel
+                        HorizontalAlignment="Center"
+                        Orientation="Horizontal"
+                        Spacing="6">
+                        <Image
+                            Width="16"
+                            Height="16"
+                            Source="ms-appx:///Assets/github.ico" />
+                        <TextBlock VerticalAlignment="Center" Text="github.com/hhwfsl/AnimeGirlsDownloader" />
+                    </StackPanel>
+                </HyperlinkButton>
             </Grid>
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -252,6 +283,17 @@
                     BorderBrush="{ThemeResource AppBarSeparatorForegroundThemeBrush}"
                     BorderThickness="0.5" />
             </Grid>
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock x:Uid="CurrentVersion_TextBlock" VerticalAlignment="Center" />
+                <TextBlock
+                    x:Name="CurrentVersionValueTextBlock"
+                    VerticalAlignment="Center"
+                    FontWeight="SemiBold" />
+                <Button
+                    x:Name="CheckForUpdatesButton"
+                    x:Uid="CheckForUpdates_Button"
+                    Click="CheckForUpdatesButton_Click" />
+            </StackPanel>
         </StackPanel>
     </Grid>
 </Page>

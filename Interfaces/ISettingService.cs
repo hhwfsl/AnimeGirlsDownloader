@@ -26,6 +26,8 @@ namespace AnimeGirlsDownloader.Interfaces
         public ISettingService SetUserName(string userName);
         public ISettingService SetUserAvatarPath(string avatarPath);
         public ISettingService SetLoggedUserName(string? loggedUserName);
+        public Settings ActivateUser(long userId, string userName);
+        public Settings DeactivateUser();
         //public ISettingService SetLoggedUserPassword(string password);
         public string SetDefaultUserNameWithSaving();
         public void ResizeWindowToStandardSize();

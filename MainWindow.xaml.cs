@@ -1,6 +1,8 @@
 using AnimeGirlsDownloader.Enums;
 using AnimeGirlsDownloader.Interfaces;
 using AnimeGirlsDownloader.Models;
+using AnimeGirlsDownloader.Responses;
+using AnimeGirlsDownloader.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
@@ -11,6 +13,7 @@ using Microsoft.UI.Xaml.Media.Imaging;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -34,48 +37,55 @@ namespace AnimeGirlsDownloader
         private SizeInt32 _windowDefaultSize;
 
         // Data
-        private Downloader _downloader;
-        private byte[]? _imageBytes = null;
+        private GetImageResponse? _currentImage;
         private string _imageId = string.Empty;
-        private Queue<InfoMessage> _infoMessageQueue = new Queue<InfoMessage>();
-        // Control
-        private SemaphoreSlim _infoQueueSemaphore = new SemaphoreSlim(0);
-        private bool _isWindowClosing = false;
-        private bool _isGettingImage = false;
+        private readonly CancellationTokenSource _lifetimeCancellation = new();
+        private bool _isGettingImage;
+        private TaskCompletionSource<bool>? _imageLoadCompletion;
 
         // Page
-        private UploadImagePage? _uploadImagePage = null;
-        private bool _isUploadImagePageOpen = false;
+        private UploadImagePage? _uploadImagePage;
+        private bool _isUploadImagePageOpen;
+        private bool _isDownloadPageOpen;
 
-        private IFileService _fileService;
-        private ISettingService _settingService;
+        private readonly IAnimeGirlsApiClient _apiClient;
+        private readonly IFileService _fileService;
+        private readonly ISettingService _settingService;
+        private readonly IUserSessionService _userSessionService;
+        private readonly IDownloadManager _downloadManager;
+        private readonly IUpdateService _updateService;
+        private bool IsContentPageOpen => _isUploadImagePageOpen || _isDownloadPageOpen;
         public MainWindow()
         {
             InitializeComponent();
-            _fileService = App.Current.Services.GetService<IFileService>()!;
-            _settingService = App.Current.Services.GetService<ISettingService>()!;
+            _apiClient = App.Current.Services.GetRequiredService<IAnimeGirlsApiClient>();
+            _fileService = App.Current.Services.GetRequiredService<IFileService>();
+            _settingService = App.Current.Services.GetRequiredService<ISettingService>();
+            _userSessionService = App.Current.Services.GetRequiredService<IUserSessionService>();
+            _downloadManager = App.Current.Services.GetRequiredService<IDownloadManager>();
+            _updateService = App.Current.Services.GetRequiredService<IUpdateService>();
             Initialize();
-            _downloader = new Downloader(BytesToBitmapImage);
-            GetRandomImage(null);
         }
         private void Initialize()
         {
             InitializeWindow();
-            _fileService!.Initialize(this);
-            this.SizeChanged += MainWindow_SizeChanged;
+            _fileService.Initialize(this);
+            SizeChanged += MainWindow_SizeChanged;
             _settingService.Initialize(ResizeWindowToStandardSize);
 
             UploadImagePageGrid.Visibility = Visibility.Collapsed;
+            DownloadPageGrid.Visibility = Visibility.Collapsed;
             DisplayImageGrid.Visibility = Visibility.Visible;
             ImageLoadingProgressRing.IsActive = false;
             ImageLoadingProgressRing.Visibility = Visibility.Collapsed;
+            ClearCurrentImage();
             AppLogger.Initialize(AddMessageToQueue);
 
-            this.Closed += WindowClosed;
-
-            Task.Run(InfomationInfo);
-
-            InitializeLogin();
+            Closed += WindowClosed;
+            _userSessionService.UserChanged += UserSessionService_UserChanged;
+            _downloadManager.QueueChanged += DownloadManager_QueueChanged;
+            UpdateDownloadQueueBadge();
+            _ = InitializeLoginAsync();
         }
         /// <summary>
         /// Save window size when window size changed.
@@ -86,10 +96,21 @@ namespace AnimeGirlsDownloader
         {
             _windowWidth = AppWindow.Size.Width;
             _windowHeight = AppWindow.Size.Height;
-            _settingService
-                    .SetWindowWidth(_windowWidth)
-                    .SetWindowHeight(_windowHeight)
-                    .SaveSetting();
+        }
+
+        private async void MainGrid_Loaded(object sender, RoutedEventArgs e)
+        {
+            MainGrid.Loaded -= MainGrid_Loaded;
+            try
+            {
+                UpdateCheckResult result = await _updateService.CheckForUpdateAsync();
+                if (result.Status == UpdateCheckStatus.UpdateAvailable && MainGrid.XamlRoot is not null)
+                    await UpdatePrompt.ShowAsync(MainGrid.XamlRoot, result);
+            }
+            catch
+            {
+                // Startup update checks are intentionally silent and must never block the app.
+            }
         }
         /// <summary>
         /// Initialize window properties.
@@ -144,19 +165,38 @@ namespace AnimeGirlsDownloader
             Settings settings = _settingService.GetSettings();
             MainGrid.RequestedTheme = settings.AppTheme;
         }
-        private async void InitializeLogin()
+        private async Task InitializeLoginAsync()
         {
-            AccountAuth accountAuth = new AccountAuth();
-            bool isLoggingSuccess = await accountAuth.LoginWithToken();
-            if(!isLoggingSuccess)
+            try
             {
-                _settingService.SetLoggedUserName(null).SaveSetting();
-                AppLogger.LogWarningWithInfoBar(AppResourceLoader.GetString("Warning_MainWindow_InitializeLogin_1"), InfoBarInfoType.Auto);
-            }
-            else
-            {
-                string info = string.Format(AppResourceLoader.GetString("Success_MainWindow_InitializeLogin_1"), _settingService.GetSettings().LoggedUserName);
+                bool isLoginSuccessful = await _apiClient.LoginWithStoredTokenAsync(_lifetimeCancellation.Token);
+                if (!isLoginSuccessful)
+                {
+                    _settingService.DeactivateUser();
+                    AppLogger.LogWarningWithInfoBar(
+                        AppResourceLoader.GetString("Warning_MainWindow_InitializeLogin_1"),
+                        InfoBarInfoType.Auto);
+                    return;
+                }
+
+                UserProfileResponse profile = await _userSessionService.SynchronizeAsync(_lifetimeCancellation.Token);
+
+                string info = string.Format(
+                    AppResourceLoader.GetString("Success_MainWindow_InitializeLogin_1"),
+                    profile.Name);
                 AppLogger.LogSuccessWithInfoBar(info, InfoBarInfoType.Auto);
+            }
+            catch (ApiClientException exception)
+            {
+                AppLogger.LogWarningWithInfoBar(exception.Message, InfoBarInfoType.Auto);
+            }
+            catch (OperationCanceledException) when (_lifetimeCancellation.IsCancellationRequested)
+            {
+            }
+            finally
+            {
+                if (!_lifetimeCancellation.IsCancellationRequested)
+                    await GetRandomImageAsync(null);
             }
         }
         private void ResizeWindowToStandardSize()
@@ -173,41 +213,60 @@ namespace AnimeGirlsDownloader
         }
         private void AddMessageToQueue(InfoBarSeverity status, string message, InfoBarInfoType type)
         {
-            InfoMessage infoMessage = new InfoMessage
+            DispatcherQueue.TryEnqueue(() =>
             {
-                Message = message,
-                InfoBarType = type,
-                Severity = status
-            };
-            _infoMessageQueue.Enqueue(infoMessage);
-            _infoQueueSemaphore.Release();
-        }
-        private async Task InfomationInfo()
-        {
-            while (!_isWindowClosing)
-            {
-                await _infoQueueSemaphore.WaitAsync();
-                if (_infoMessageQueue.Count > 0)
+                if (type == InfoBarInfoType.Manually)
                 {
-                    InfoMessage infoMessage = _infoMessageQueue.Dequeue();
-                    if(infoMessage.InfoBarType == InfoBarInfoType.Manually)
-                    {
-                        DispatcherQueue.TryEnqueue(() => InfoManuallyClose(infoMessage.Severity, infoMessage.Message));
-                    }
-                    else
-                    {
-                        DispatcherQueue.TryEnqueue(() => InfoAutoClose(infoMessage.Severity, infoMessage.Message));
-                    }
+                    ShowPersistentInfoBar(status, message);
                 }
-                await Task.Delay(200);
-            }
+                else
+                {
+                    ShowTemporaryInfoBar(status, message);
+                }
+            });
         }
         
         private void WindowClosed(object? sender, WindowEventArgs args)
         {
-            _isWindowClosing = true;
+            _userSessionService.UserChanged -= UserSessionService_UserChanged;
+            _downloadManager.QueueChanged -= DownloadManager_QueueChanged;
+            _settingService
+                .SetWindowWidth(_windowWidth)
+                .SetWindowHeight(_windowHeight)
+                .SaveSetting();
+            _lifetimeCancellation.Cancel();
+            _lifetimeCancellation.Dispose();
         }
-        private void InfoManuallyClose(InfoBarSeverity severityLevel, string message)
+
+        private void UserSessionService_UserChanged(object? sender, UserProfileResponse? profile) =>
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                InitializeWindowTheme();
+                UpdateDownloadQueueBadge();
+            });
+
+        private void DownloadManager_QueueChanged(object? sender, EventArgs e) =>
+            DispatcherQueue.TryEnqueue(UpdateDownloadQueueBadge);
+
+        private void UpdateDownloadQueueBadge()
+        {
+            long userId = _settingService.GetSettings().LoggedUserId ?? 0;
+            DownloadItem[] items = _downloadManager.Items.Where(item => item.UserId == userId).ToArray();
+            if (items.Length == 0)
+            {
+                DownloadQueueBadge.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            bool hasActiveTask = items.Any(item => item.Status is
+                DownloadStatus.Queued or DownloadStatus.Downloading or DownloadStatus.Canceling);
+            bool hasFailedTask = items.Any(item => item.Status == DownloadStatus.Failed);
+            DownloadQueueBadgeText.Text = !hasActiveTask && hasFailedTask
+                ? "×"
+                : items.Length > 99 ? "99+" : items.Length.ToString();
+            DownloadQueueBadge.Visibility = Visibility.Visible;
+        }
+        private void ShowPersistentInfoBar(InfoBarSeverity severityLevel, string message)
         {
             InfoBar infoBar = new InfoBar();
             infoBar.IsOpen = true;
@@ -231,7 +290,7 @@ namespace AnimeGirlsDownloader
             };
             InfoBarGrid.Children.Add(infoBar);
         }
-        private async void InfoAutoClose(InfoBarSeverity severityLevel, string message)
+        private async void ShowTemporaryInfoBar(InfoBarSeverity severityLevel, string message)
         {
             InfoBar infoBar = new InfoBar();
             infoBar.IsOpen = true;
@@ -259,33 +318,52 @@ namespace AnimeGirlsDownloader
             infoBar.IsOpen = false;
             InfoBarGrid.Children.Remove(infoBar);
         }
-        private void BytesToBitmapImage(byte[]? bytes, string id, List<Models.Tag>? tags)
+        private async Task DisplayImageResponseAsync(GetImageResponse response)
         {
-            if (bytes == null)
+            var completion = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            _imageLoadCompletion = completion;
+            var bitmap = new BitmapImage
             {
-                AppLogger.LogErrorWithInfoBar(AppResourceLoader.GetString("Error_MainWindow_BytesToBitmapImage_1"));
-                return;
+                CreateOptions = BitmapCreateOptions.IgnoreImageCache,
+                UriSource = new Uri(response.PreviewUrl, UriKind.Absolute),
+            };
+            DisplayImage.Source = bitmap;
+            try
+            {
+                await completion.Task.WaitAsync(_lifetimeCancellation.Token);
+                _currentImage = response;
+                _imageId = response.Id;
+                SetCurrentImageActionsEnabled(true);
             }
-            BitmapImage bitmapImage = new BitmapImage();
-            using (MemoryStream ms = new MemoryStream(bytes))
+            finally
             {
-                bitmapImage.SetSource(ms.AsRandomAccessStream());
-                DisplayImage.Source = bitmapImage;
-                _imageBytes = bytes;
-                _imageId = id;
-                //ImageIdTextBlock.Text = _imageId;
-            }
-            //TagContainer.Children.Clear();
-            if(tags != null)
-            {
-                //foreach (Models.Tag tag in tags)
-                //{
-                //    TagContainer.Children.Add(new UserControls.Tag { TagText = tag.Name });
-                //}
+                if (ReferenceEquals(_imageLoadCompletion, completion))
+                    _imageLoadCompletion = null;
             }
         }
 
-        private async void GetRandomImage(List<Tag>? tags)
+        private void DisplayImage_ImageOpened(object sender, RoutedEventArgs e) =>
+            _imageLoadCompletion?.TrySetResult(true);
+
+        private void DisplayImage_ImageFailed(object sender, ExceptionRoutedEventArgs e) =>
+            _imageLoadCompletion?.TrySetException(new InvalidOperationException(e.ErrorMessage));
+
+        private void ClearCurrentImage()
+        {
+            _currentImage = null;
+            _imageId = string.Empty;
+            DisplayImage.Source = null;
+            SetCurrentImageActionsEnabled(false);
+        }
+
+        private void SetCurrentImageActionsEnabled(bool isEnabled)
+        {
+            SaveImageButton.IsEnabled = isEnabled;
+            CopyImageMenuFlyoutItem.IsEnabled = isEnabled;
+            CopyImageLinkMenuFlyoutItem.IsEnabled = isEnabled;
+        }
+
+        private async Task GetRandomImageAsync(List<Tag>? tags)
         {
             if (_isGettingImage)
             {
@@ -293,28 +371,52 @@ namespace AnimeGirlsDownloader
                 return;
             }
             _isGettingImage = true;
-
-            DisplayImageGrid.Visibility = Visibility.Collapsed;
-            if (!_isUploadImagePageOpen)
+            ClearCurrentImage();
+            try
             {
-                
-                ImageLoadingProgressRing.Visibility = Visibility.Visible;
-                ImageLoadingProgressRing.IsActive = true;
+                DisplayImageGrid.Visibility = Visibility.Collapsed;
+                if (!IsContentPageOpen)
+                {
+                    ImageLoadingProgressRing.Visibility = Visibility.Visible;
+                    ImageLoadingProgressRing.IsActive = true;
+                }
+
+                Settings settings = _settingService.GetSettings();
+                GetImageResponse response = await _apiClient.GetRandomImageAsync(
+                    tags,
+                    settings.ImageType,
+                    settings.IsAllowAiGenerated,
+                    _lifetimeCancellation.Token);
+                await DisplayImageResponseAsync(response);
             }
-            
-
-            Settings settings = _settingService.GetSettings();
-            await _downloader.GetRandomImage(tags, settings.ImageType, settings.IsAllowAiGenerated);
-
-            ImageLoadingProgressRing.Visibility = Visibility.Collapsed;
-            ImageLoadingProgressRing.IsActive = false;
-            if (!_isUploadImagePageOpen)
+            catch (OperationCanceledException) when (_lifetimeCancellation.IsCancellationRequested)
             {
-                DisplayImageGrid.Visibility = Visibility.Visible;
             }
-            _isGettingImage = false;
+            catch (ApiClientException exception)
+            {
+                AppLogger.LogErrorWithInfoBar(exception.Message);
+            }
+            catch (InvalidOperationException exception)
+            {
+                string message = string.Format(
+                    AppResourceLoader.GetString("Error_MainWindow_LoadPreview_1"),
+                    exception.Message);
+                AppLogger.LogErrorWithInfoBar(message);
+            }
+            finally
+            {
+                ImageLoadingProgressRing.Visibility = Visibility.Collapsed;
+                ImageLoadingProgressRing.IsActive = false;
+                if (!IsContentPageOpen)
+                {
+                    DisplayImageGrid.Visibility = Visibility.Visible;
+                }
+
+                _isGettingImage = false;
+            }
         }
-        private async void GetImageById(long id)
+
+        private async Task GetImageByIdAsync(long id)
         {
             if (_isGettingImage)
             {
@@ -322,17 +424,41 @@ namespace AnimeGirlsDownloader
                 return;
             }
             _isGettingImage = true;
-            DisplayImageGrid.Visibility = Visibility.Collapsed;
-            ImageLoadingProgressRing.Visibility = Visibility.Visible;
-            ImageLoadingProgressRing.IsActive = true;
+            ClearCurrentImage();
+            try
+            {
+                DisplayImageGrid.Visibility = Visibility.Collapsed;
+                if (!IsContentPageOpen)
+                {
+                    ImageLoadingProgressRing.Visibility = Visibility.Visible;
+                    ImageLoadingProgressRing.IsActive = true;
+                }
 
-            Settings settings = _settingService.GetSettings();
-            await _downloader.GetImageById(id);
-
-            ImageLoadingProgressRing.Visibility = Visibility.Collapsed;
-            ImageLoadingProgressRing.IsActive = false;
-            DisplayImageGrid.Visibility = Visibility.Visible;
-            _isGettingImage = false;
+                GetImageResponse response = await _apiClient.GetImageByIdAsync(id, _lifetimeCancellation.Token);
+                await DisplayImageResponseAsync(response);
+            }
+            catch (OperationCanceledException) when (_lifetimeCancellation.IsCancellationRequested)
+            {
+            }
+            catch (ApiClientException exception)
+            {
+                AppLogger.LogErrorWithInfoBar(exception.Message);
+            }
+            catch (InvalidOperationException exception)
+            {
+                string message = string.Format(
+                    AppResourceLoader.GetString("Error_MainWindow_LoadPreview_1"),
+                    exception.Message);
+                AppLogger.LogErrorWithInfoBar(message);
+            }
+            finally
+            {
+                ImageLoadingProgressRing.Visibility = Visibility.Collapsed;
+                ImageLoadingProgressRing.IsActive = false;
+                if (!IsContentPageOpen)
+                    DisplayImageGrid.Visibility = Visibility.Visible;
+                _isGettingImage = false;
+            }
         }
         private void RefreshImage(string query)
         {
@@ -342,32 +468,35 @@ namespace AnimeGirlsDownloader
         {
             if (string.IsNullOrEmpty(query))
             {
-                GetRandomImage(null);
+                _ = GetRandomImageAsync(null);
                 return;
             }
-            string[] tagStrings = query.Split(' ');
-            if (tagStrings.Length == 1)
+            string[] tagStrings = query.Split(
+                ' ',
+                StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            if (tagStrings.Length == 0)
             {
-                try
-                {
-                    long id = Convert.ToInt64(tagStrings[0]);
-                    GetImageById(id);
-                    return;
-                }
-                catch { }
+                _ = GetRandomImageAsync(null);
+                return;
+            }
+
+            if (tagStrings.Length == 1 && long.TryParse(tagStrings[0], out long imageId))
+            {
+                _ = GetImageByIdAsync(imageId);
+                return;
             }
             List<Models.Tag> tags = new List<Models.Tag>();
             foreach (string tag in tagStrings)
             {
                 tags.Add(new Models.Tag { Name = tag });
             }
-            GetRandomImage(tags);
+            _ = GetRandomImageAsync(tags);
         }
-        private async void SaveImage()
+        private async Task SaveImageAsync()
         {
             string savingPath = _settingService.GetSettings().SavingPath ?? string.Empty;
             bool isFixedSavingPath = _settingService.GetSettings().IsEnableFixedSavingPath;
-            if (_imageBytes == null)
+            if (_currentImage is null)
             {
                 AppLogger.LogErrorWithInfoBar(AppResourceLoader.GetString("Error_MainWindow_SaveImage_1"));
                 return;
@@ -381,50 +510,47 @@ namespace AnimeGirlsDownloader
                 }
                 savingPath = folder.Path;
             }
-            savingPath = Path.Combine(savingPath, $"{_imageId}.png");
-            try
+            else if (string.IsNullOrWhiteSpace(savingPath))
             {
-                await File.WriteAllBytesAsync(savingPath, _imageBytes);
+                AppLogger.LogErrorWithInfoBar(AppResourceLoader.GetString("Error_MainWindow_OpenSavingPathButtonClick_1"));
+                return;
             }
-            catch (Exception e)
-            {
-                AppLogger.LogErrorWithInfoBar(e.Message);
-            }
-            AppLogger.LogInfo($"{AppResourceLoader.GetString("Info_MainWindow_SaveImage_1")}{savingPath}");
-            AppLogger.LogSuccessWithInfoBar(AppResourceLoader.GetString("Success_MainWindow_SaveImage_1"), InfoBarInfoType.Auto);
+
+            long userId = _settingService.GetSettings().LoggedUserId ?? 0;
+            _downloadManager.Enqueue(_currentImage.Id, _currentImage.DownloadUrl, savingPath, userId);
         }
-        private async Task CopyImageToClipBoard()
+
+        private void CopyImageToClipBoard()
         {
-            if (_imageBytes == null || _imageBytes.Length <= 0)
+            if (_currentImage is null)
             {
                 AppLogger.LogErrorWithInfoBar(AppResourceLoader.GetString("Error_MainWindow_CopyImageToClipBoard_1"));
                 return;
             }
-            var ms = new InMemoryRandomAccessStream();
             try
             {
-                using (DataWriter writer = new DataWriter(ms.GetOutputStreamAt(0)))
-                {
-                    writer.WriteBytes(_imageBytes);
-                    await writer.StoreAsync();
-                }
-                var streamReference = RandomAccessStreamReference.CreateFromStream(ms);
+                var streamReference = RandomAccessStreamReference.CreateFromUri(new Uri(_currentImage.PreviewUrl));
                 var dataPackage = new DataPackage();
                 dataPackage.SetBitmap(streamReference);
                 Clipboard.SetContent(dataPackage);
                 Clipboard.Flush();
-                ms.Dispose();
                 AppLogger.LogSuccessWithInfoBar(AppResourceLoader.GetString("Success_MainWindow_CopyImageToClipBoard_1"), InfoBarInfoType.Auto);
             }
-            catch
+            catch (Exception exception)
             {
-                ms.Dispose();
+                AppLogger.LogError(exception.Message);
                 AppLogger.LogErrorWithInfoBar(AppResourceLoader.GetString("Error_MainWindow_CopyImageToClipBoard_2"));
             }
 
         }
         private void CopyImageLinkToClipboard()
         {
+            if (string.IsNullOrWhiteSpace(_imageId))
+            {
+                AppLogger.LogErrorWithInfoBar(AppResourceLoader.GetString("Error_MainWindow_CopyImageLinkToClipBoard_1"));
+                return;
+            }
+
             try
             {
                 string imageLink = $"{AppConsts.AnimeGirlsImageIdLinkEndpoint}{_imageId}";
@@ -434,8 +560,9 @@ namespace AnimeGirlsDownloader
                 Clipboard.Flush();
                 AppLogger.LogSuccessWithInfoBar(AppResourceLoader.GetString("Success_MainWindow_CopyImageLinkToClipBoard_1"), InfoBarInfoType.Auto);
             }
-            catch
+            catch (Exception exception)
             {
+                AppLogger.LogError(exception.Message);
                 AppLogger.LogErrorWithInfoBar(AppResourceLoader.GetString("Error_MainWindow_CopyImageLinkToClipBoard_1"));
             }
         }
@@ -448,8 +575,7 @@ namespace AnimeGirlsDownloader
 
         private void WindowControlCloseEllipse_PointerReleased(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
         {
-            _isWindowClosing = true;
-            this.Close();
+            Close();
         }
 
         private void WindowControlMinimizeEllipse_PointerReleased(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
@@ -502,33 +628,41 @@ namespace AnimeGirlsDownloader
                 AppLogger.LogErrorWithInfoBar(AppResourceLoader.GetString("Error_MainWindow_OpenSavingPathButtonClick_1"));
                 return;
             }
-            if (!Directory.Exists(path))
+            try
             {
-                Directory.CreateDirectory(path);
+                if (!Directory.Exists(path))
+                {
+                    Directory.CreateDirectory(path);
+                }
+                StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(path);
+                await Launcher.LaunchFolderAsync(folder);
             }
-            await Launcher.LaunchUriAsync(new Uri(path));
+            catch (Exception exception)
+            {
+                AppLogger.LogErrorWithInfoBar(exception.Message);
+            }
         }
 
         private void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
-            GC.Collect();
             string query = SearchTagsAutoSuggestBox.Text;
             RefreshImage(query);
         }
 
         private async void SaveImageButton_Click(object sender, RoutedEventArgs e)
         {
-            SaveImage();
+            await SaveImageAsync();
         }
 
-        private async void CopyImageMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
+        private void CopyImageMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
         {
-            await CopyImageToClipBoard();
+            CopyImageToClipBoard();
         }
 
         private void UploadImageButton_Click(object sender, RoutedEventArgs e)
         {
             if (_isUploadImagePageOpen) return;
+            CloseDownloadPage();
             _uploadImagePage = new UploadImagePage();
             _uploadImagePage.Initialize(CloseUploadImagePage);
             DisplayImageGrid.Visibility = Visibility.Collapsed;
@@ -539,7 +673,11 @@ namespace AnimeGirlsDownloader
         }
         private void CloseUploadImagePage()
         {
+            if (!_isUploadImagePageOpen) return;
             UploadImagePageGrid.Visibility = Visibility.Collapsed;
+            UploadImagePageFrame.Content = null;
+            _uploadImagePage = null;
+            _isUploadImagePageOpen = false;
             if(_isGettingImage)
             {
                 ImageLoadingProgressRing.Visibility = Visibility.Visible;
@@ -548,8 +686,33 @@ namespace AnimeGirlsDownloader
             {
                 DisplayImageGrid.Visibility = Visibility.Visible;
             }
-            _uploadImagePage = null;
-            _isUploadImagePageOpen = false;
+        }
+
+        private void DownloadQueueButton_Click(object sender, RoutedEventArgs e) => OpenDownloadPage();
+
+        private void OpenDownloadPage()
+        {
+            if (_isDownloadPageOpen) return;
+            CloseUploadImagePage();
+            var page = new DownloadPage();
+            page.Initialize(CloseDownloadPage);
+            DisplayImageGrid.Visibility = Visibility.Collapsed;
+            ImageLoadingProgressRing.Visibility = Visibility.Collapsed;
+            DownloadPageFrame.Content = page;
+            DownloadPageGrid.Visibility = Visibility.Visible;
+            _isDownloadPageOpen = true;
+        }
+
+        private void CloseDownloadPage()
+        {
+            if (!_isDownloadPageOpen) return;
+            DownloadPageGrid.Visibility = Visibility.Collapsed;
+            DownloadPageFrame.Content = null;
+            _isDownloadPageOpen = false;
+            if (_isGettingImage)
+                ImageLoadingProgressRing.Visibility = Visibility.Visible;
+            else
+                DisplayImageGrid.Visibility = Visibility.Visible;
         }
 
         private void SearchTagsAutoSuggestBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
@@ -562,5 +725,6 @@ namespace AnimeGirlsDownloader
         {
             CopyImageLinkToClipboard();
         }
+
     }
 }

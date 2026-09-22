@@ -1,14 +1,16 @@
-﻿using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using Windows.Storage;
 
-namespace AnimeGirlsDownloader.Interfaces
+namespace AnimeGirlsDownloader.Interfaces;
+
+public interface IFileService
 {
-    public interface IFileService
-    {
-        public void Initialize(Window window);
-        public Task<StorageFolder?> PickFolderAsync();
-        public Task<StorageFile?> PickImageAsync();
-        public Task<byte[]> ImageToBytes(string filePath);
-    }
+    void Initialize(Window window);
+    Task<StorageFolder?> PickFolderAsync();
+    Task<StorageFile?> PickImageAsync();
+    Task<IReadOnlyList<StorageFile>> PickImagesAsync();
+    Task<byte[]> EncodeImageAsPngAsync(string filePath, CancellationToken cancellationToken = default);
 }

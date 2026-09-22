@@ -5,11 +5,8 @@ namespace AnimeGirlsDownloader
 {
     public static class AppResourceLoader
     {
-        private readonly static ResourceLoader _loader = new ResourceLoader();
+        private static readonly ResourceLoader _loader = new();
 
-        public static string GetString(string resourceKey)
-        {
-            return _loader.GetString(resourceKey);
-        }
+        public static string GetString(string resourceKey) => _loader.GetString(resourceKey);
     }
 }

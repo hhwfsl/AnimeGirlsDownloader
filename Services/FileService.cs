@@ -1,49 +1,80 @@
-﻿using AnimeGirlsDownloader.Interfaces;
+using AnimeGirlsDownloader.Interfaces;
 using Microsoft.UI.Xaml;
 using SkiaSharp;
 using System;
+using System.IO;
+using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 
-namespace AnimeGirlsDownloader.Services
+namespace AnimeGirlsDownloader.Services;
+
+public sealed class FileService : IFileService
 {
-    public class FileService : IFileService
+    private readonly FolderPicker _folderPicker = new();
+    private readonly FileOpenPicker _filePicker = new();
+    private bool _isInitialized;
+
+    public void Initialize(Window window)
     {
-        private Window? _window;
-        private IntPtr _hWnd;
-        private readonly FolderPicker _folderPicker = new FolderPicker();
-        private readonly FileOpenPicker _filePicker = new FileOpenPicker();
-        public void Initialize(Window window)
+        ArgumentNullException.ThrowIfNull(window);
+        if (_isInitialized)
         {
-            _window = window;
-            _hWnd = WinRT.Interop.WindowNative.GetWindowHandle(_window);
-            WinRT.Interop.InitializeWithWindow.Initialize(_folderPicker, _hWnd);
-            WinRT.Interop.InitializeWithWindow.Initialize(_filePicker, _hWnd);
-            _filePicker.FileTypeFilter.Add(".jpg");
-            _filePicker.FileTypeFilter.Add(".png");
-            _filePicker.FileTypeFilter.Add(".bmp");
-            _filePicker.FileTypeFilter.Add(".jpeg");
+            return;
         }
 
-        public async Task<StorageFolder?> PickFolderAsync()
+        IntPtr windowHandle = WinRT.Interop.WindowNative.GetWindowHandle(window);
+        WinRT.Interop.InitializeWithWindow.Initialize(_folderPicker, windowHandle);
+        WinRT.Interop.InitializeWithWindow.Initialize(_filePicker, windowHandle);
+
+        foreach (string extension in new[] { ".jpg", ".jpeg", ".png", ".bmp", ".webp" })
         {
-            StorageFolder? folder = await _folderPicker.PickSingleFolderAsync();
-            return folder;
+            _filePicker.FileTypeFilter.Add(extension);
         }
 
-        public async Task<StorageFile?> PickImageAsync()
-        {
-            StorageFile? imageFile = await _filePicker.PickSingleFileAsync();
-            return imageFile;
-        }
+        _isInitialized = true;
+    }
 
-        public async Task<byte[]> ImageToBytes(string filePath)
+    public Task<StorageFolder?> PickFolderAsync()
+    {
+        EnsureInitialized();
+        return _folderPicker.PickSingleFolderAsync().AsTask();
+    }
+
+    public Task<StorageFile?> PickImageAsync()
+    {
+        EnsureInitialized();
+        return _filePicker.PickSingleFileAsync().AsTask();
+    }
+
+    public async Task<IReadOnlyList<StorageFile>> PickImagesAsync()
+    {
+        EnsureInitialized();
+        return await _filePicker.PickMultipleFilesAsync();
+    }
+
+    public Task<byte[]> EncodeImageAsPngAsync(string filePath, CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(filePath);
+        return Task.Run(() =>
         {
-            using var bitmap = SKBitmap.Decode(filePath);
-            using var image = SKImage.FromBitmap(bitmap);
-            using var data = image.Encode(SKEncodedImageFormat.Png, 100);
+            cancellationToken.ThrowIfCancellationRequested();
+            using SKBitmap bitmap = SKBitmap.Decode(filePath)
+                ?? throw new InvalidDataException("The selected file is not a supported image.");
+            using SKImage image = SKImage.FromBitmap(bitmap);
+            using SKData data = image.Encode(SKEncodedImageFormat.Png, 100)
+                ?? throw new InvalidDataException("The selected image could not be encoded.");
             return data.ToArray();
+        }, cancellationToken);
+    }
+
+    private void EnsureInitialized()
+    {
+        if (!_isInitialized)
+        {
+            throw new InvalidOperationException("The file picker has not been initialized with a window.");
         }
     }
 }

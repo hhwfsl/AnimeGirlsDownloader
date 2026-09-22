@@ -333,4 +333,111 @@
   <data name="Success_MainWindow_InitializeLogin_1" xml:space="preserve">
     <value>"{0}" logged in successfully, meow~</value>
   </data>
+  <data name="DownloadQueue_Button.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Download queue</value>
+  </data>
+  <data name="DownloadPageTitle_TextBlock.Text" xml:space="preserve">
+    <value>Downloads</value>
+  </data>
+  <data name="DownloadPageClose_Button.Content" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="DownloadPageCancel_Button.Content" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="DownloadPageRetry_Button.Content" xml:space="preserve">
+    <value>Retry</value>
+  </data>
+  <data name="DownloadItem_DisplayName" xml:space="preserve">
+    <value>Image {0}</value>
+  </data>
+  <data name="DownloadStatus_Queued" xml:space="preserve">
+    <value>Queued</value>
+  </data>
+  <data name="DownloadStatus_Downloading" xml:space="preserve">
+    <value>Downloading</value>
+  </data>
+  <data name="DownloadStatus_Canceling" xml:space="preserve">
+    <value>Canceling</value>
+  </data>
+  <data name="DownloadStatus_Completed" xml:space="preserve">
+    <value>Completed</value>
+  </data>
+  <data name="DownloadStatus_Failed" xml:space="preserve">
+    <value>Failed</value>
+  </data>
+  <data name="DownloadStatus_Canceled" xml:space="preserve">
+    <value>Canceled</value>
+  </data>
+  <data name="Error_MainWindow_LoadPreview_1" xml:space="preserve">
+    <value>Failed to load the image preview: {0}</value>
+  </data>
+  <data name="UploadPreviewHint_TextBlock.Text" xml:space="preserve">
+    <value>A preview is available when exactly one image is selected.</value>
+  </data>
+  <data name="UploadSelectedPaths_TextBlock.Text" xml:space="preserve">
+    <value>Selected paths</value>
+  </data>
+  <data name="UploadAddSources_Button.Content" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="UploadAddImages_MenuFlyoutItem.Text" xml:space="preserve">
+    <value>Add images</value>
+  </data>
+  <data name="UploadAddFolder_MenuFlyoutItem.Text" xml:space="preserve">
+    <value>Add folder</value>
+  </data>
+  <data name="UploadRemoveSource_Button.Content" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="UploadSingleImageTags_TextBlock.Text" xml:space="preserve">
+    <value>Tags (single-image upload only)</value>
+  </data>
+  <data name="UploadAddTag_Button.Content" xml:space="preserve">
+    <value>Add tag</value>
+  </data>
+  <data name="UploadRemoveLastTag_Button.Content" xml:space="preserve">
+    <value>Remove last tag</value>
+  </data>
+  <data name="UploadStart_Button.Content" xml:space="preserve">
+    <value>Upload</value>
+  </data>
+  <data name="UploadClose_Button.Content" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="Success_DownloadManager_DownloadCompleted_1" xml:space="preserve">
+    <value>Successfully downloaded {0} to {1}.</value>
+  </data>
+  <data name="Error_DownloadManager_DownloadFailed_1" xml:space="preserve">
+    <value>Failed to download {0}: {1}</value>
+  </data>
+  <data name="CurrentVersion_TextBlock.Text" xml:space="preserve">
+    <value>Current version:</value>
+  </data>
+  <data name="CheckForUpdates_Button.Content" xml:space="preserve">
+    <value>Check for updates</value>
+  </data>
+  <data name="UpdateAvailable_Dialog_Title" xml:space="preserve">
+    <value>Update available</value>
+  </data>
+  <data name="UpdateAvailable_Dialog_Message" xml:space="preserve">
+    <value>Current version: {0}
+Latest version: {1}
+Would you like to download it now?</value>
+  </data>
+  <data name="UpdateAvailable_Dialog_Download" xml:space="preserve">
+    <value>Download</value>
+  </data>
+  <data name="UpdateAvailable_Dialog_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Error_UpdatePrompt_OpenDownload_1" xml:space="preserve">
+    <value>Unable to open the update download link.</value>
+  </data>
+  <data name="Success_UpdateService_UpToDate_1" xml:space="preserve">
+    <value>You are using the latest version.</value>
+  </data>
+  <data name="Warning_UpdateService_CheckFailed_1" xml:space="preserve">
+    <value>Unable to check for updates. Please try again later.</value>
+  </data>
 </root>

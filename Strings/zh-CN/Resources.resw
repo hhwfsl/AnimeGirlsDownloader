@@ -333,4 +333,91 @@
   <data name="Success_MainWindow_InitializeLogin_1" xml:space="preserve">
     <value>"{0}"登录成功喵~</value>
   </data>
+  <data name="DownloadQueue_Button.ToolTipService.ToolTip" xml:space="preserve">
+    <value>下载队列</value>
+  </data>
+  <data name="DownloadPageTitle_TextBlock.Text" xml:space="preserve">
+    <value>下载任务</value>
+  </data>
+  <data name="DownloadPageClose_Button.Content" xml:space="preserve">
+    <value>关闭</value>
+  </data>
+  <data name="DownloadPageCancel_Button.Content" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="DownloadPageRetry_Button.Content" xml:space="preserve">
+    <value>重试</value>
+  </data>
+  <data name="DownloadItem_DisplayName" xml:space="preserve">
+    <value>图片 {0}</value>
+  </data>
+  <data name="DownloadStatus_Queued" xml:space="preserve">
+    <value>等待中</value>
+  </data>
+  <data name="DownloadStatus_Downloading" xml:space="preserve">
+    <value>下载中</value>
+  </data>
+  <data name="DownloadStatus_Canceling" xml:space="preserve">
+    <value>正在取消</value>
+  </data>
+  <data name="DownloadStatus_Completed" xml:space="preserve">
+    <value>已完成</value>
+  </data>
+  <data name="DownloadStatus_Failed" xml:space="preserve">
+    <value>失败</value>
+  </data>
+  <data name="DownloadStatus_Canceled" xml:space="preserve">
+    <value>已取消</value>
+  </data>
+  <data name="Error_MainWindow_LoadPreview_1" xml:space="preserve">
+    <value>加载图片预览失败：{0}</value>
+  </data>
+  <data name="UploadPreviewHint_TextBlock.Text" xml:space="preserve">
+    <value>仅选择一张图片时会显示预览。</value>
+  </data>
+  <data name="UploadSelectedPaths_TextBlock.Text" xml:space="preserve">
+    <value>已选路径</value>
+  </data>
+  <data name="UploadAddSources_Button.Content" xml:space="preserve">
+    <value>添加</value>
+  </data>
+  <data name="UploadAddImages_MenuFlyoutItem.Text" xml:space="preserve">
+    <value>添加图片</value>
+  </data>
+  <data name="UploadAddFolder_MenuFlyoutItem.Text" xml:space="preserve">
+    <value>添加文件夹</value>
+  </data>
+  <data name="UploadRemoveSource_Button.Content" xml:space="preserve">
+    <value>移除</value>
+  </data>
+  <data name="UploadSingleImageTags_TextBlock.Text" xml:space="preserve">
+    <value>标签（仅限单张图片上传）</value>
+  </data>
+  <data name="UploadAddTag_Button.Content" xml:space="preserve">
+    <value>添加标签</value>
+  </data>
+  <data name="UploadRemoveLastTag_Button.Content" xml:space="preserve">
+    <value>移除最后一个标签</value>
+  </data>
+  <data name="UploadStart_Button.Content" xml:space="preserve">
+    <value>上传</value>
+  </data>
+  <data name="UploadClose_Button.Content" xml:space="preserve">
+    <value>关闭</value>
+  </data>
+  <data name="Success_DownloadManager_DownloadCompleted_1" xml:space="preserve">
+    <value>已成功下载{0}到{1}</value>
+  </data>
+  <data name="Error_DownloadManager_DownloadFailed_1" xml:space="preserve">
+    <value>下载{0}失败：{1}</value>
+  </data>
+  <data name="CurrentVersion_TextBlock.Text" xml:space="preserve"><value>当前版本：</value></data>
+  <data name="CheckForUpdates_Button.Content" xml:space="preserve"><value>检查更新</value></data>
+  <data name="UpdateAvailable_Dialog_Title" xml:space="preserve"><value>发现新版本</value></data>
+  <data name="UpdateAvailable_Dialog_Message" xml:space="preserve"><value>当前版本：{0}&#xA;最新版本：{1}&#xA;是否立即前往下载？</value></data>
+  <data name="UpdateAvailable_Dialog_Download" xml:space="preserve"><value>下载</value></data>
+  <data name="UpdateAvailable_Dialog_Cancel" xml:space="preserve"><value>取消</value></data>
+  <data name="Error_UpdatePrompt_OpenDownload_1" xml:space="preserve"><value>无法打开更新下载链接。</value></data>
+  <data name="Success_UpdateService_UpToDate_1" xml:space="preserve"><value>当前已是最新版本。</value></data>
+  <data name="Warning_UpdateService_CheckFailed_1" xml:space="preserve"><value>检查更新失败，请稍后重试。</value></data>
 </root>

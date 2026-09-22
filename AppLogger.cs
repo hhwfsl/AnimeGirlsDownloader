@@ -1,76 +1,62 @@
-﻿using AnimeGirlsDownloader.Enums;
+using AnimeGirlsDownloader.Enums;
 using Microsoft.UI.Xaml.Controls;
 using System;
+using System.Diagnostics;
+using System.Globalization;
 using System.IO;
-using System.Threading;
 
-namespace AnimeGirlsDownloader
+namespace AnimeGirlsDownloader;
+
+public static class AppLogger
 {
-    public static class AppLogger
+    private static readonly object SyncRoot = new();
+    private static Action<InfoBarSeverity, string, InfoBarInfoType>? _messageSink;
+
+    public static void Initialize(Action<InfoBarSeverity, string, InfoBarInfoType> messageSink)
     {
-        private static readonly SemaphoreSlim _logLock = new SemaphoreSlim(1, 1);
-        private static Action<InfoBarSeverity, string, InfoBarInfoType>? _addToMessageQueue = null;
-        //private static Action<string>? _InfoInfomation = null;
-        private static async void WriteLog(InfoBarSeverity status, string message)
+        _messageSink = messageSink ?? throw new ArgumentNullException(nameof(messageSink));
+    }
+
+    public static void LogInfo(string message) => WriteLog(InfoBarSeverity.Informational, message);
+    public static void LogWarning(string message) => WriteLog(InfoBarSeverity.Warning, message);
+    public static void LogError(string message) => WriteLog(InfoBarSeverity.Error, message);
+    public static void LogSuccess(string message) => WriteLog(InfoBarSeverity.Success, message);
+
+    public static void LogInfoWithInfoBar(string message, InfoBarInfoType type = InfoBarInfoType.Auto) =>
+        WriteLogWithInfoBar(InfoBarSeverity.Informational, message, type);
+
+    public static void LogWarningWithInfoBar(string message, InfoBarInfoType type = InfoBarInfoType.Manually) =>
+        WriteLogWithInfoBar(InfoBarSeverity.Warning, message, type);
+
+    public static void LogErrorWithInfoBar(string message, InfoBarInfoType type = InfoBarInfoType.Manually) =>
+        WriteLogWithInfoBar(InfoBarSeverity.Error, message, type);
+
+    public static void LogSuccessWithInfoBar(string message, InfoBarInfoType type = InfoBarInfoType.Auto) =>
+        WriteLogWithInfoBar(InfoBarSeverity.Success, message, type);
+
+    private static void WriteLogWithInfoBar(InfoBarSeverity severity, string message, InfoBarInfoType type)
+    {
+        WriteLog(severity, message);
+        _messageSink?.Invoke(severity, message, type);
+    }
+
+    private static void WriteLog(InfoBarSeverity severity, string message)
+    {
+        string line = $"[{DateTimeOffset.Now:O}] [{severity}] {message}";
+        Debug.WriteLine(line);
+
+        try
         {
-            await _logLock.WaitAsync();
-            string log = $"[{status}][{DateTime.Now:G}] {message}";
-            string path = Path.Combine(AppConsts.AppLogPath, $"{DateTime.Now:D}.txt");
-            Console.WriteLine(log);
-            if (!Directory.Exists(AppConsts.AppLogPath))
+            lock (SyncRoot)
             {
-                Directory.CreateDirectory(AppConsts.AppLogPath);
+                AppPaths.EnsureDataDirectories();
+                string fileName = DateTime.Today.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) + ".log";
+                File.AppendAllText(Path.Combine(AppPaths.LogDirectory, fileName), line + Environment.NewLine);
             }
-            if (!File.Exists(path))
-            {
-                File.Create(path).Close();
-            }
-            await File.AppendAllTextAsync(path, log + Environment.NewLine);
-            _logLock.Release();
         }
-        private static void AddToInfoBarQueue(InfoBarSeverity status, string message, InfoBarInfoType type)
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
         {
-            _addToMessageQueue?.Invoke(status, message, type);
-        }
-        public static void Initialize(Action<InfoBarSeverity, string, InfoBarInfoType> addToMessageQueue)
-        {
-            _addToMessageQueue = addToMessageQueue;
-        }
-        public static void LogInfo(string message)
-        {
-            WriteLog(InfoBarSeverity.Informational, message);
-        }
-        public static void LogWarning(string message)
-        {
-            WriteLog(InfoBarSeverity.Warning, message);
-        }
-        public static void LogError(string message)
-        {
-            WriteLog(InfoBarSeverity.Error, message);
-        }
-        public static void LogSuccess(string message)
-        {
-            WriteLog(InfoBarSeverity.Success, message);
-        }
-        public static void LogInfoWithInfoBar(string message, InfoBarInfoType type = InfoBarInfoType.Auto)
-        {
-            WriteLog(InfoBarSeverity.Informational, message);
-            AddToInfoBarQueue(InfoBarSeverity.Informational, message, type);
-        }
-        public static void LogWarningWithInfoBar(string message, InfoBarInfoType type = InfoBarInfoType.Manually)
-        {
-            WriteLog(InfoBarSeverity.Warning, message);
-            AddToInfoBarQueue(InfoBarSeverity.Warning, message, type);
-        }
-        public static void LogErrorWithInfoBar(string message, InfoBarInfoType type = InfoBarInfoType.Manually)
-        {
-            WriteLog(InfoBarSeverity.Error, message);
-            AddToInfoBarQueue(InfoBarSeverity.Error, message, type);
-        }
-        public static void LogSuccessWithInfoBar(string message, InfoBarInfoType type = InfoBarInfoType.Auto)
-        {
-            WriteLog(InfoBarSeverity.Success, message);
-            AddToInfoBarQueue(InfoBarSeverity.Success, message, type);
+            Debug.WriteLine($"Unable to write application log: {exception.Message}");
         }
     }
 }

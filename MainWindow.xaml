@@ -14,7 +14,7 @@
         <MicaBackdrop />
     </Window.SystemBackdrop>
 
-    <Grid x:Name="MainGrid">
+    <Grid x:Name="MainGrid" Loaded="MainGrid_Loaded">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -97,6 +97,8 @@
                         x:Name="DisplayImage"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
+                        ImageFailed="DisplayImage_ImageFailed"
+                        ImageOpened="DisplayImage_ImageOpened"
                         Stretch="Uniform">
                         <Image.ContextFlyout>
                             <MenuFlyout>
@@ -124,6 +126,12 @@
                     CornerRadius="10">
                     <Frame x:Name="UploadImagePageFrame" />
                 </Grid>
+                <Grid
+                    x:Name="DownloadPageGrid"
+                    Canvas.ZIndex="100"
+                    CornerRadius="10">
+                    <Frame x:Name="DownloadPageFrame" />
+                </Grid>
             </Grid>
             <Grid Grid.Column="1" CornerRadius="25,0,0,25">
                 <Border Padding="10" CornerRadius="25,0,0,25">
@@ -146,6 +154,35 @@
                             Style="{StaticResource IconButton}">
                             <FontIcon Glyph="&#xE72C;" />
                         </Button>
+                        <Grid>
+                            <Button
+                                x:Name="DownloadQueueButton"
+                                x:Uid="DownloadQueue_Button"
+                                Click="DownloadQueueButton_Click"
+                                Style="{StaticResource IconButton}">
+                                <FontIcon Glyph="&#xE81C;" />
+                            </Button>
+                            <Border
+                                x:Name="DownloadQueueBadge"
+                                Height="18"
+                                MinWidth="18"
+                                Margin="0,-5,-5,0"
+                                Padding="4,0"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Top"
+                                Background="#D13438"
+                                CornerRadius="9"
+                                IsHitTestVisible="False"
+                                Visibility="Collapsed">
+                                <TextBlock
+                                    x:Name="DownloadQueueBadgeText"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    FontSize="10"
+                                    FontWeight="SemiBold"
+                                    Foreground="White" />
+                            </Border>
+                        </Grid>
                         <Button
                             x:Name="ChangeThemeButton"
                             x:Uid="ChangeTheme_Button"

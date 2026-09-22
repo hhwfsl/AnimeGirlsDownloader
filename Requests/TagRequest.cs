@@ -1,17 +1,6 @@
-﻿
+namespace AnimeGirlsDownloader.Requests;
 
-using System.Text.Json.Serialization;
-
-namespace AnimeGirlsDownloader.Requests
+public sealed class TagRequest
 {
-    public class TagRequest
-    {
-        public string PartialTag { get; set; } = string.Empty;
-    }
-    [JsonSourceGenerationOptions(WriteIndented = true)]
-    [JsonSerializable(typeof(TagRequest))]
-    internal partial class TagRequestContext : JsonSerializerContext
-    {
-
-    }
+    public string PartialTag { get; set; } = string.Empty;
 }

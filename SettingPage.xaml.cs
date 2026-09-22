@@ -1,6 +1,7 @@
 using AnimeGirlsDownloader.Enums;
 using AnimeGirlsDownloader.Interfaces;
 using AnimeGirlsDownloader.Models;
+using AnimeGirlsDownloader.Responses;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -15,20 +16,27 @@ namespace AnimeGirlsDownloader
 {
     public sealed partial class SettingPage : Page
     {
-        private Settings _settings = new Settings();
-        private Dictionary<ImageType, bool?> _imageTypeToBool = new Dictionary<ImageType, bool?> 
+        private Settings _settings = new();
+        private readonly Dictionary<ImageType, bool?> _imageTypeToBool = new()
         { { ImageType.SFW, false }, { ImageType.NSFW, true }, { ImageType.ALL, null } };
         
-        private Dictionary<ImageIsAllowAiType, bool?> _imageIsAllowAiTypeToBool = new Dictionary<ImageIsAllowAiType, bool?> 
+        private readonly Dictionary<ImageIsAllowAiType, bool?> _imageIsAllowAiTypeToBool = new()
         { { ImageIsAllowAiType.NotAllowAi, false }, { ImageIsAllowAiType.AiOnly, null }, { ImageIsAllowAiType.ALL, true } };
 
-        private ISettingService _settingService;
-        private IFileService _fileService;
+        private readonly ISettingService _settingService;
+        private readonly IFileService _fileService;
+        private readonly IUserSessionService _userSessionService;
+        private readonly IUpdateService _updateService;
         public SettingPage()
         {
             InitializeComponent();
-            _settingService = App.Current.Services.GetService<ISettingService>()!;
-            _fileService = App.Current.Services.GetService<IFileService>()!;
+            _settingService = App.Current.Services.GetRequiredService<ISettingService>();
+            _fileService = App.Current.Services.GetRequiredService<IFileService>();
+            _userSessionService = App.Current.Services.GetRequiredService<IUserSessionService>();
+            _updateService = App.Current.Services.GetRequiredService<IUpdateService>();
+            CurrentVersionValueTextBlock.Text = _updateService.CurrentVersion;
+            _userSessionService.UserChanged += UserSessionService_UserChanged;
+            Unloaded += SettingPage_Unloaded;
             Initialize();
         }
         private void Initialize()
@@ -69,7 +77,7 @@ namespace AnimeGirlsDownloader
 
             if (!File.Exists(_settings.UserAvatarPath))
             {
-                _settings.UserAvatarPath = Path.Combine(AppConsts.AppAssetsDirectory, "avatar.png");
+                _settings.UserAvatarPath = Path.Combine(AppPaths.AssetsDirectory, "avatar.png");
                 _settingService.SetUserAvatarPath(_settings.UserAvatarPath).SaveSetting();
             }
             UserAvatarImageBrush.ImageSource = new BitmapImage(new Uri(_settings.UserAvatarPath));
@@ -82,6 +90,8 @@ namespace AnimeGirlsDownloader
         private void InitializeLogin()
         {
             LoggedStackPanel.Visibility = Microsoft.UI.Xaml.Visibility.Collapsed;
+            LogoutButton.Visibility = Microsoft.UI.Xaml.Visibility.Collapsed;
+            LoginButton.Visibility = Microsoft.UI.Xaml.Visibility.Visible;
             string? loggedUserName = _settings.LoggedUserName;
             if(string.IsNullOrEmpty(loggedUserName))
             {
@@ -90,13 +100,29 @@ namespace AnimeGirlsDownloader
             LoggedAccountNameTextBlock.Text = loggedUserName;
             LoggedStackPanel.Visibility = Microsoft.UI.Xaml.Visibility.Visible;
             LoginButton.Visibility = Microsoft.UI.Xaml.Visibility.Collapsed;
+            LogoutButton.Visibility = Microsoft.UI.Xaml.Visibility.Visible;
         }
-        private void AfterLoginHandler(string userName)
+        private void AfterLoginHandler(UserProfileResponse profile)
         {
-            LoggedAccountNameTextBlock.Text = userName;
-            _settings.LoggedUserName = userName;
-            _settingService.SaveSetting(_settings);
+            _settings = _settingService.GetSettings();
+            LoggedAccountNameTextBlock.Text = profile.Name;
+            InitializeSettings();
             InitializeLogin();
+        }
+
+        private void UserSessionService_UserChanged(object? sender, UserProfileResponse? profile)
+        {
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                _settings = _settingService.GetSettings();
+                InitializeSettings();
+                InitializeLogin();
+            });
+        }
+
+        private void SettingPage_Unloaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        {
+            _userSessionService.UserChanged -= UserSessionService_UserChanged;
         }
 
         private void IsEnableFixedSavingPathCheckBox_Checked(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
@@ -115,11 +141,18 @@ namespace AnimeGirlsDownloader
 
         private async void PathSelectButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
-            StorageFolder? folder = await _fileService.PickFolderAsync();
-            if (folder != null)
+            try
             {
-                _settings.SavingPath = folder.Path;
-                _settingService.SaveSetting(_settings);
+                StorageFolder? folder = await _fileService.PickFolderAsync();
+                if (folder != null)
+                {
+                    _settings.SavingPath = folder.Path;
+                    _settingService.SaveSetting(_settings);
+                }
+            }
+            catch (Exception exception)
+            {
+                AppLogger.LogErrorWithInfoBar(exception.Message);
             }
         }
 
@@ -150,7 +183,7 @@ namespace AnimeGirlsDownloader
 
         private void LanguageListComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            string selectedItem = LanguageListComboBox.SelectedItem.ToString() ?? string.Empty;
+            string selectedItem = LanguageListComboBox.SelectedItem?.ToString() ?? string.Empty;
             if (string.IsNullOrEmpty(selectedItem))
             {
                 AppLogger.LogErrorWithInfoBar(AppResourceLoader.GetString("Error_SettingPage_LanguageListComboBoxSelectionChanged_1"));
@@ -159,17 +192,60 @@ namespace AnimeGirlsDownloader
             string languageCode = LanguageMap.SimpleToFull(LanguageMap.DisplayToSimple(selectedItem));
             _settingService.SetLanguage(languageCode).SaveSetting();
             _settings.Language = languageCode;
+        }
 
+        private async void CheckForUpdatesButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        {
+            CheckForUpdatesButton.IsEnabled = false;
+            try
+            {
+                UpdateCheckResult result = await _updateService.CheckForUpdateAsync();
+                if (result.Status == UpdateCheckStatus.UpdateAvailable && XamlRoot is not null)
+                {
+                    await UpdatePrompt.ShowAsync(XamlRoot, result);
+                }
+                else if (result.Status == UpdateCheckStatus.UpToDate)
+                {
+                    AppLogger.LogSuccessWithInfoBar(
+                        AppResourceLoader.GetString("Success_UpdateService_UpToDate_1"),
+                        InfoBarInfoType.Auto);
+                }
+                else
+                {
+                    AppLogger.LogWarningWithInfoBar(
+                        AppResourceLoader.GetString("Warning_UpdateService_CheckFailed_1"),
+                        InfoBarInfoType.Auto);
+                }
+            }
+            finally
+            {
+                CheckForUpdatesButton.IsEnabled = true;
+            }
         }
 
         private async void EditUserAvatarMenuFlyoutItem_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
-            StorageFile? file = await _fileService.PickImageAsync();
-            if (file != null)
+            try
             {
-                _settings.UserAvatarPath = file.Path;
-                UserAvatarImageBrush.ImageSource = new BitmapImage(new Uri(file.Path));
-                _settingService.SaveSetting(_settings);
+                StorageFile? file = await _fileService.PickImageAsync();
+                if (file != null)
+                {
+                    string avatarPath = file.Path;
+                    if (_settings.LoggedUserId is long userId)
+                    {
+                        AppPaths.EnsureUserDirectory(userId);
+                        avatarPath = AppPaths.GetUserAvatarFilePath(userId);
+                        byte[] avatarBytes = await _fileService.EncodeImageAsPngAsync(file.Path);
+                        await File.WriteAllBytesAsync(avatarPath, avatarBytes);
+                    }
+                    _settings.UserAvatarPath = avatarPath;
+                    UserAvatarImageBrush.ImageSource = new BitmapImage(new Uri(avatarPath));
+                    _settingService.SaveSetting(_settings);
+                }
+            }
+            catch (Exception exception)
+            {
+                AppLogger.LogErrorWithInfoBar(exception.Message);
             }
         }
 
@@ -211,7 +287,7 @@ namespace AnimeGirlsDownloader
             }
         }
 
-        private async void LoginButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        private void LoginButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
             Button button = (Button)sender;
             Frame frame = new Frame();
@@ -229,14 +305,10 @@ namespace AnimeGirlsDownloader
 
         private void LogoutButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
-            _settings.LoggedUserName = null;
-            _settingService.SaveSetting(_settings);
-            if(File.Exists(AppConsts.AuthFilePath))
-            {
-                File.Delete(AppConsts.AuthFilePath);
-            }
-            LoggedStackPanel.Visibility = Microsoft.UI.Xaml.Visibility.Collapsed;
-            LoginButton.Visibility = Microsoft.UI.Xaml.Visibility.Visible;
+            _userSessionService.SignOut();
+            _settings = _settingService.GetSettings();
+            InitializeSettings();
+            InitializeLogin();
         }
 
         private void IsEnableAiGeneratedCheckBox_Checked(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)

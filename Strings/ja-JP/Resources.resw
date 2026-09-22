@@ -333,4 +333,91 @@
   <data name="Success_MainWindow_InitializeLogin_1" xml:space="preserve">
     <value>{0}ログイン成功にゃ〜</value>
   </data>
+  <data name="DownloadQueue_Button.ToolTipService.ToolTip" xml:space="preserve">
+    <value>ダウンロードキュー</value>
+  </data>
+  <data name="DownloadPageTitle_TextBlock.Text" xml:space="preserve">
+    <value>ダウンロード</value>
+  </data>
+  <data name="DownloadPageClose_Button.Content" xml:space="preserve">
+    <value>閉じる</value>
+  </data>
+  <data name="DownloadPageCancel_Button.Content" xml:space="preserve">
+    <value>キャンセル</value>
+  </data>
+  <data name="DownloadPageRetry_Button.Content" xml:space="preserve">
+    <value>再試行</value>
+  </data>
+  <data name="DownloadItem_DisplayName" xml:space="preserve">
+    <value>画像 {0}</value>
+  </data>
+  <data name="DownloadStatus_Queued" xml:space="preserve">
+    <value>待機中</value>
+  </data>
+  <data name="DownloadStatus_Downloading" xml:space="preserve">
+    <value>ダウンロード中</value>
+  </data>
+  <data name="DownloadStatus_Canceling" xml:space="preserve">
+    <value>キャンセル中</value>
+  </data>
+  <data name="DownloadStatus_Completed" xml:space="preserve">
+    <value>完了</value>
+  </data>
+  <data name="DownloadStatus_Failed" xml:space="preserve">
+    <value>失敗</value>
+  </data>
+  <data name="DownloadStatus_Canceled" xml:space="preserve">
+    <value>キャンセル済み</value>
+  </data>
+  <data name="Error_MainWindow_LoadPreview_1" xml:space="preserve">
+    <value>画像プレビューの読み込みに失敗しました: {0}</value>
+  </data>
+  <data name="UploadPreviewHint_TextBlock.Text" xml:space="preserve">
+    <value>画像を1枚だけ選択した場合にプレビューを表示します。</value>
+  </data>
+  <data name="UploadSelectedPaths_TextBlock.Text" xml:space="preserve">
+    <value>選択したパス</value>
+  </data>
+  <data name="UploadAddSources_Button.Content" xml:space="preserve">
+    <value>追加</value>
+  </data>
+  <data name="UploadAddImages_MenuFlyoutItem.Text" xml:space="preserve">
+    <value>画像を追加</value>
+  </data>
+  <data name="UploadAddFolder_MenuFlyoutItem.Text" xml:space="preserve">
+    <value>フォルダーを追加</value>
+  </data>
+  <data name="UploadRemoveSource_Button.Content" xml:space="preserve">
+    <value>削除</value>
+  </data>
+  <data name="UploadSingleImageTags_TextBlock.Text" xml:space="preserve">
+    <value>タグ（画像1枚のアップロード時のみ）</value>
+  </data>
+  <data name="UploadAddTag_Button.Content" xml:space="preserve">
+    <value>タグを追加</value>
+  </data>
+  <data name="UploadRemoveLastTag_Button.Content" xml:space="preserve">
+    <value>最後のタグを削除</value>
+  </data>
+  <data name="UploadStart_Button.Content" xml:space="preserve">
+    <value>アップロード</value>
+  </data>
+  <data name="UploadClose_Button.Content" xml:space="preserve">
+    <value>閉じる</value>
+  </data>
+  <data name="Success_DownloadManager_DownloadCompleted_1" xml:space="preserve">
+    <value>{0}を{1}にダウンロードしました。</value>
+  </data>
+  <data name="Error_DownloadManager_DownloadFailed_1" xml:space="preserve">
+    <value>{0}のダウンロードに失敗しました: {1}</value>
+  </data>
+  <data name="CurrentVersion_TextBlock.Text" xml:space="preserve"><value>現在のバージョン:</value></data>
+  <data name="CheckForUpdates_Button.Content" xml:space="preserve"><value>更新を確認</value></data>
+  <data name="UpdateAvailable_Dialog_Title" xml:space="preserve"><value>新しいバージョンがあります</value></data>
+  <data name="UpdateAvailable_Dialog_Message" xml:space="preserve"><value>現在のバージョン: {0}&#xA;最新バージョン: {1}&#xA;今すぐダウンロードしますか？</value></data>
+  <data name="UpdateAvailable_Dialog_Download" xml:space="preserve"><value>ダウンロード</value></data>
+  <data name="UpdateAvailable_Dialog_Cancel" xml:space="preserve"><value>キャンセル</value></data>
+  <data name="Error_UpdatePrompt_OpenDownload_1" xml:space="preserve"><value>更新のダウンロードリンクを開けませんでした。</value></data>
+  <data name="Success_UpdateService_UpToDate_1" xml:space="preserve"><value>現在のバージョンは最新です。</value></data>
+  <data name="Warning_UpdateService_CheckFailed_1" xml:space="preserve"><value>更新を確認できませんでした。後でもう一度お試しください。</value></data>
 </root>

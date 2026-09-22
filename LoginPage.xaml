@@ -49,13 +49,15 @@
                         Width="200"
                         Margin="0,0,0,10"
                         HorizontalAlignment="Left"
-                        VerticalAlignment="Center" />
-                    <TextBox
+                        VerticalAlignment="Center"
+                        KeyDown="LoginInput_KeyDown" />
+                    <PasswordBox
                         x:Name="LoginPasswordTextBox"
                         Grid.Row="1"
                         Width="200"
                         HorizontalAlignment="Left"
-                        VerticalAlignment="Center" />
+                        VerticalAlignment="Center"
+                        KeyDown="LoginInput_KeyDown" />
                 </Grid>
             </Grid>
             <StackPanel
@@ -90,7 +92,6 @@
                         FontWeight="SemiBold" />
                 </Button>
             </StackPanel>
-
         </StackPanel>
         <TeachingTip
             x:Name="LoginPageTipTeachingTip"
