@@ -420,4 +420,15 @@
   <data name="Error_UpdatePrompt_OpenDownload_1" xml:space="preserve"><value>无法打开更新下载链接。</value></data>
   <data name="Success_UpdateService_UpToDate_1" xml:space="preserve"><value>当前已是最新版本。</value></data>
   <data name="Warning_UpdateService_CheckFailed_1" xml:space="preserve"><value>检查更新失败，请稍后重试。</value></data>
+  <data name="Warning_MainWindow_LoginRequiredForUpload_1" xml:space="preserve"><value>请先登录，再进入上传页面。</value></data>
+  <data name="Warning_Profile_LoginRequired_1" xml:space="preserve"><value>请先登录，再修改账号资料。</value></data>
+  <data name="Success_Profile_Updated_1" xml:space="preserve"><value>账号资料已同步到服务器。</value></data>
+  <data name="Error_Profile_UpdateFailed_1" xml:space="preserve"><value>无法更新账号资料。</value></data>
+  <data name="AvatarCrop_Title" xml:space="preserve"><value>裁剪头像</value></data>
+  <data name="AvatarCrop_Save" xml:space="preserve"><value>保存</value></data>
+  <data name="AvatarCrop_Cancel" xml:space="preserve"><value>取消</value></data>
+  <data name="AvatarCrop_Zoom" xml:space="preserve"><value>缩放</value></data>
+  <data name="AvatarCrop_Horizontal" xml:space="preserve"><value>水平位置</value></data>
+  <data name="AvatarCrop_Vertical" xml:space="preserve"><value>垂直位置</value></data>
+  <data name="AvatarCrop_GestureHint" xml:space="preserve"><value>拖动图片调整位置，使用鼠标滚轮、触控板或双指手势缩放。</value></data>
 </root>

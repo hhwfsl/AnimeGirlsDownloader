@@ -101,6 +101,24 @@ public sealed class UserSessionService : IUserSessionService
         return profile;
     }
 
+    public async Task<UserProfileResponse> UpdateUserNameAsync(
+        string name,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        await _apiClient.UpdateUserNameAsync(name.Trim(), cancellationToken);
+        return await SynchronizeAsync(cancellationToken);
+    }
+
+    public async Task<UserProfileResponse> UpdateAvatarAsync(
+        byte[] pngData,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(pngData);
+        await _apiClient.UpdateAvatarAsync(pngData, cancellationToken);
+        return await SynchronizeAsync(cancellationToken);
+    }
+
     public void SignOut()
     {
         _tokenStore.Delete();

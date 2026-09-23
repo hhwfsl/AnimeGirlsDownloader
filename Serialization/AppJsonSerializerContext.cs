@@ -14,6 +14,7 @@ namespace AnimeGirlsDownloader.Serialization;
 [JsonSerializable(typeof(RegisterRequest))]
 [JsonSerializable(typeof(TagRequest))]
 [JsonSerializable(typeof(UploadImageRequest))]
+[JsonSerializable(typeof(UpdateUserNameRequest))]
 [JsonSerializable(typeof(GetImageResponse))]
 [JsonSerializable(typeof(LoginResponse))]
 [JsonSerializable(typeof(RegisterResponse))]

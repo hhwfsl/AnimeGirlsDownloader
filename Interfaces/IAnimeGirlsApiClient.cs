@@ -24,6 +24,8 @@ public interface IAnimeGirlsApiClient
     Task<IReadOnlyList<Tag>> GetTagsAsync(string partialTag, CancellationToken cancellationToken = default);
     Task<UserProfileResponse> GetCurrentUserAsync(CancellationToken cancellationToken = default);
     Task<byte[]?> DownloadAvatarAsync(string avatarUrl, CancellationToken cancellationToken = default);
+    Task<UserProfileResponse> UpdateUserNameAsync(string name, CancellationToken cancellationToken = default);
+    Task<UserProfileResponse> UpdateAvatarAsync(byte[] pngData, CancellationToken cancellationToken = default);
     Task<string> DownloadImageAsync(
         string downloadUrl,
         string destinationDirectory,

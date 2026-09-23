@@ -420,4 +420,15 @@
   <data name="Error_UpdatePrompt_OpenDownload_1" xml:space="preserve"><value>更新のダウンロードリンクを開けませんでした。</value></data>
   <data name="Success_UpdateService_UpToDate_1" xml:space="preserve"><value>現在のバージョンは最新です。</value></data>
   <data name="Warning_UpdateService_CheckFailed_1" xml:space="preserve"><value>更新を確認できませんでした。後でもう一度お試しください。</value></data>
+  <data name="Warning_MainWindow_LoginRequiredForUpload_1" xml:space="preserve"><value>アップロード画面を開く前にログインしてください。</value></data>
+  <data name="Warning_Profile_LoginRequired_1" xml:space="preserve"><value>アカウント情報を変更する前にログインしてください。</value></data>
+  <data name="Success_Profile_Updated_1" xml:space="preserve"><value>アカウント情報をサーバーと同期しました。</value></data>
+  <data name="Error_Profile_UpdateFailed_1" xml:space="preserve"><value>アカウント情報を更新できませんでした。</value></data>
+  <data name="AvatarCrop_Title" xml:space="preserve"><value>アバターを切り抜く</value></data>
+  <data name="AvatarCrop_Save" xml:space="preserve"><value>保存</value></data>
+  <data name="AvatarCrop_Cancel" xml:space="preserve"><value>キャンセル</value></data>
+  <data name="AvatarCrop_Zoom" xml:space="preserve"><value>ズーム</value></data>
+  <data name="AvatarCrop_Horizontal" xml:space="preserve"><value>横位置</value></data>
+  <data name="AvatarCrop_Vertical" xml:space="preserve"><value>縦位置</value></data>
+  <data name="AvatarCrop_GestureHint" xml:space="preserve"><value>画像をドラッグして位置を調整し、マウスホイール、タッチパッド、またはピンチ操作で拡大縮小できます。</value></data>
 </root>

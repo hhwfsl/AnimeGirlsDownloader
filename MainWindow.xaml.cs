@@ -662,6 +662,13 @@ namespace AnimeGirlsDownloader
         private void UploadImageButton_Click(object sender, RoutedEventArgs e)
         {
             if (_isUploadImagePageOpen) return;
+            if (_userSessionService.CurrentUser is null)
+            {
+                AppLogger.LogWarningWithInfoBar(
+                    AppResourceLoader.GetString("Warning_MainWindow_LoginRequiredForUpload_1"),
+                    InfoBarInfoType.Auto);
+                return;
+            }
             CloseDownloadPage();
             _uploadImagePage = new UploadImagePage();
             _uploadImagePage.Initialize(CloseUploadImagePage);

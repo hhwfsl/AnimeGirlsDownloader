@@ -169,10 +169,45 @@ public sealed class AnimeGirlsApiClient : IAnimeGirlsApiClient
             AppJsonSerializerContext.Default.UserProfileResponse,
             token,
             cancellationToken);
-        if (!string.IsNullOrWhiteSpace(profile.AvatarUrl))
+        NormalizeProfileAvatarUrl(profile);
+        return profile;
+    }
+
+    public async Task<UserProfileResponse> UpdateUserNameAsync(
+        string name,
+        CancellationToken cancellationToken = default)
+    {
+        string token = await RequireTokenAsync(cancellationToken);
+        var payload = new UpdateUserNameRequest { Name = name.Trim() };
+        using var request = new HttpRequestMessage(HttpMethod.Put, "auth/profile")
         {
-            profile.AvatarUrl = MakeAbsoluteUrl(profile.AvatarUrl);
-        }
+            Content = JsonContent.Create(payload, AppJsonSerializerContext.Default.UpdateUserNameRequest),
+        };
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        UserProfileResponse profile = await SendProfileRequestAsync(request, cancellationToken);
+        NormalizeProfileAvatarUrl(profile);
+        return profile;
+    }
+
+    public async Task<UserProfileResponse> UpdateAvatarAsync(
+        byte[] pngData,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(pngData);
+        if (pngData.Length == 0)
+            throw new ArgumentException("The avatar image is empty.", nameof(pngData));
+
+        string token = await RequireTokenAsync(cancellationToken);
+        using var request = new HttpRequestMessage(HttpMethod.Put, "auth/avatar");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var imageContent = new ByteArrayContent(pngData);
+        imageContent.Headers.ContentType = new MediaTypeHeaderValue("image/png");
+        var form = new MultipartFormDataContent();
+        form.Add(imageContent, "avatar", "avatar.png");
+        request.Content = form;
+
+        UserProfileResponse profile = await SendProfileRequestAsync(request, cancellationToken);
+        NormalizeProfileAvatarUrl(profile);
         return profile;
     }
 
@@ -302,6 +337,43 @@ public sealed class AnimeGirlsApiClient : IAnimeGirlsApiClient
     {
         response.PreviewUrl = MakeAbsoluteUrl(response.PreviewUrl);
         response.DownloadUrl = MakeAbsoluteUrl(response.DownloadUrl);
+    }
+
+    private void NormalizeProfileAvatarUrl(UserProfileResponse profile)
+    {
+        if (!string.IsNullOrWhiteSpace(profile.AvatarUrl))
+            profile.AvatarUrl = MakeAbsoluteUrl(profile.AvatarUrl);
+    }
+
+    private async Task<UserProfileResponse> SendProfileRequestAsync(
+        HttpRequestMessage request,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            using HttpResponseMessage response = await _httpClient.SendAsync(
+                request,
+                HttpCompletionOption.ResponseHeadersRead,
+                cancellationToken);
+            if (!response.IsSuccessStatusCode)
+                throw new ApiClientException(
+                    $"The server returned {(int)response.StatusCode} ({response.ReasonPhrase}).",
+                    response.StatusCode);
+
+            await using Stream stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+            return await JsonSerializer.DeserializeAsync(
+                stream,
+                AppJsonSerializerContext.Default.UserProfileResponse,
+                cancellationToken)
+                ?? throw new ApiClientException("The server returned an empty or invalid response.");
+        }
+        catch (ApiClientException) { throw; }
+        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+        { throw new ApiClientException("The request timed out."); }
+        catch (HttpRequestException exception)
+        { throw new ApiClientException("Unable to connect to the server.", innerException: exception); }
+        catch (JsonException exception)
+        { throw new ApiClientException("The server returned an invalid response.", innerException: exception); }
     }
 
     private string MakeAbsoluteUrl(string url) => Uri.TryCreate(url, UriKind.Absolute, out Uri? absolute)

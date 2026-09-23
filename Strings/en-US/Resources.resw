@@ -440,4 +440,15 @@ Would you like to download it now?</value>
   <data name="Warning_UpdateService_CheckFailed_1" xml:space="preserve">
     <value>Unable to check for updates. Please try again later.</value>
   </data>
+  <data name="Warning_MainWindow_LoginRequiredForUpload_1" xml:space="preserve"><value>Sign in before opening the upload page.</value></data>
+  <data name="Warning_Profile_LoginRequired_1" xml:space="preserve"><value>Sign in before changing your account profile.</value></data>
+  <data name="Success_Profile_Updated_1" xml:space="preserve"><value>Your account profile has been synchronized.</value></data>
+  <data name="Error_Profile_UpdateFailed_1" xml:space="preserve"><value>Unable to update your account profile.</value></data>
+  <data name="AvatarCrop_Title" xml:space="preserve"><value>Crop avatar</value></data>
+  <data name="AvatarCrop_Save" xml:space="preserve"><value>Save</value></data>
+  <data name="AvatarCrop_Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="AvatarCrop_Zoom" xml:space="preserve"><value>Zoom</value></data>
+  <data name="AvatarCrop_Horizontal" xml:space="preserve"><value>Horizontal</value></data>
+  <data name="AvatarCrop_Vertical" xml:space="preserve"><value>Vertical</value></data>
+  <data name="AvatarCrop_GestureHint" xml:space="preserve"><value>Drag the image to reposition it. Use the mouse wheel, touchpad, or pinch gesture to zoom.</value></data>
 </root>

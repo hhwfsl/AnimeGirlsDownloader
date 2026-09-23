@@ -27,6 +27,7 @@ namespace AnimeGirlsDownloader
         private readonly IFileService _fileService;
         private readonly IUserSessionService _userSessionService;
         private readonly IUpdateService _updateService;
+        private bool _isSavingUserName;
         public SettingPage()
         {
             InitializeComponent();
@@ -80,7 +81,7 @@ namespace AnimeGirlsDownloader
                 _settings.UserAvatarPath = Path.Combine(AppPaths.AssetsDirectory, "avatar.png");
                 _settingService.SetUserAvatarPath(_settings.UserAvatarPath).SaveSetting();
             }
-            UserAvatarImageBrush.ImageSource = new BitmapImage(new Uri(_settings.UserAvatarPath));
+            _ = LoadAvatarImageAsync(_settings.UserAvatarPath);
             if (string.IsNullOrEmpty(_settings.UserName))
             {
                 _settings.UserName = _settingService.SetDefaultUserNameWithSaving();
@@ -225,40 +226,60 @@ namespace AnimeGirlsDownloader
 
         private async void EditUserAvatarMenuFlyoutItem_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
+            if (_userSessionService.CurrentUser is null)
+            {
+                AppLogger.LogWarningWithInfoBar(
+                    AppResourceLoader.GetString("Warning_Profile_LoginRequired_1"),
+                    InfoBarInfoType.Auto);
+                return;
+            }
+
+            EditUserAvatarMenuFlyoutItem.IsEnabled = false;
             try
             {
                 StorageFile? file = await _fileService.PickImageAsync();
-                if (file != null)
-                {
-                    string avatarPath = file.Path;
-                    if (_settings.LoggedUserId is long userId)
-                    {
-                        AppPaths.EnsureUserDirectory(userId);
-                        avatarPath = AppPaths.GetUserAvatarFilePath(userId);
-                        byte[] avatarBytes = await _fileService.EncodeImageAsPngAsync(file.Path);
-                        await File.WriteAllBytesAsync(avatarPath, avatarBytes);
-                    }
-                    _settings.UserAvatarPath = avatarPath;
-                    UserAvatarImageBrush.ImageSource = new BitmapImage(new Uri(avatarPath));
-                    _settingService.SaveSetting(_settings);
-                }
+                if (file is null || XamlRoot is null) return;
+
+                using var cropDialog = new AvatarCropDialog(file.Path) { XamlRoot = XamlRoot };
+                if (await cropDialog.ShowAsync() != ContentDialogResult.Primary) return;
+
+                await _userSessionService.UpdateAvatarAsync(cropDialog.GetCroppedPng());
+                _settings = _settingService.GetSettings();
+                await LoadAvatarImageAsync(_settings.UserAvatarPath);
+                AppLogger.LogSuccessWithInfoBar(
+                    AppResourceLoader.GetString("Success_Profile_Updated_1"),
+                    InfoBarInfoType.Auto);
             }
             catch (Exception exception)
             {
-                AppLogger.LogErrorWithInfoBar(exception.Message);
+                AppLogger.LogErrorWithInfoBar(
+                    $"{AppResourceLoader.GetString("Error_Profile_UpdateFailed_1")} {exception.Message}");
+            }
+            finally
+            {
+                EditUserAvatarMenuFlyoutItem.IsEnabled = true;
             }
         }
 
         private void EditUserNameMenuFlyoutItem_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
+            if (_userSessionService.CurrentUser is null)
+            {
+                AppLogger.LogWarningWithInfoBar(
+                    AppResourceLoader.GetString("Warning_Profile_LoginRequired_1"),
+                    InfoBarInfoType.Auto);
+                return;
+            }
+
             string oldUserName = UserNameTextBlock.Text.Trim();
             UserNameTextBox.Text = oldUserName;
             UserNameTextBlock.Visibility = Microsoft.UI.Xaml.Visibility.Collapsed;
             UserNameTextBox.Visibility = Microsoft.UI.Xaml.Visibility.Visible;
             UserNameTextBox.Focus(Microsoft.UI.Xaml.FocusState.Programmatic);
         }
-        private void EditUserName()
+        private async System.Threading.Tasks.Task EditUserNameAsync()
         {
+            if (_isSavingUserName) return;
             string newUserName = UserNameTextBox.Text.Trim();
             if (string.IsNullOrEmpty(newUserName))
             {
@@ -268,22 +289,68 @@ namespace AnimeGirlsDownloader
                 UserNameTextBox.Visibility = Microsoft.UI.Xaml.Visibility.Collapsed;
                 return;
             }
-            UserNameTextBlock.Text = newUserName;
-            _settings.UserName = newUserName;
-            _settingService.SetUserName(newUserName).SaveSetting();
-            UserNameTextBlock.Visibility = Microsoft.UI.Xaml.Visibility.Visible;
-            UserNameTextBox.Visibility = Microsoft.UI.Xaml.Visibility.Collapsed;
+
+            if (string.Equals(newUserName, _settings.UserName, StringComparison.Ordinal))
+            {
+                UserNameTextBlock.Visibility = Microsoft.UI.Xaml.Visibility.Visible;
+                UserNameTextBox.Visibility = Microsoft.UI.Xaml.Visibility.Collapsed;
+                return;
+            }
+
+            _isSavingUserName = true;
+            UserNameTextBox.IsEnabled = false;
+            try
+            {
+                UserProfileResponse profile = await _userSessionService.UpdateUserNameAsync(newUserName);
+                _settings = _settingService.GetSettings();
+                UserNameTextBlock.Text = profile.Name;
+                LoggedAccountNameTextBlock.Text = profile.Name;
+                AppLogger.LogSuccessWithInfoBar(
+                    AppResourceLoader.GetString("Success_Profile_Updated_1"),
+                    InfoBarInfoType.Auto);
+            }
+            catch (Exception exception)
+            {
+                UserNameTextBox.Text = _settings.UserName;
+                AppLogger.LogErrorWithInfoBar(
+                    $"{AppResourceLoader.GetString("Error_Profile_UpdateFailed_1")} {exception.Message}");
+            }
+            finally
+            {
+                _isSavingUserName = false;
+                UserNameTextBox.IsEnabled = true;
+                UserNameTextBlock.Visibility = Microsoft.UI.Xaml.Visibility.Visible;
+                UserNameTextBox.Visibility = Microsoft.UI.Xaml.Visibility.Collapsed;
+            }
         }
-        private void UserNameTextBox_LostFocus(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        private async void UserNameTextBox_LostFocus(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
-            EditUserName();
+            await EditUserNameAsync();
         }
 
-        private void UserNameTextBox_KeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
+        private async void UserNameTextBox_KeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
         {
             if (e.Key == Windows.System.VirtualKey.Enter)
             {
-                EditUserName();
+                e.Handled = true;
+                await EditUserNameAsync();
+            }
+        }
+
+        private async System.Threading.Tasks.Task LoadAvatarImageAsync(string path)
+        {
+            try
+            {
+                StorageFile file = await StorageFile.GetFileFromPathAsync(path);
+                using var stream = await file.OpenReadAsync();
+                var image = new BitmapImage();
+                await image.SetSourceAsync(stream);
+                if (string.Equals(path, _settings.UserAvatarPath, StringComparison.OrdinalIgnoreCase))
+                    UserAvatarImageBrush.ImageSource = image;
+            }
+            catch (Exception exception)
+            {
+                AppLogger.LogWarning($"Unable to display the cached avatar. {exception.Message}");
             }
         }
 
