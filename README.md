@@ -1,10 +1,6 @@
 # AnimeGirlsDownloader
 
-[![Build](https://github.com/hhwfsl/AnimeGirlsDownloader/actions/workflows/build.yml/badge.svg)](https://github.com/hhwfsl/AnimeGirlsDownloader/actions/workflows/build.yml)
-[![Release](https://img.shields.io/github/v/release/hhwfsl/AnimeGirlsDownloader)](https://github.com/hhwfsl/AnimeGirlsDownloader/releases/latest)
-[![License](https://img.shields.io/github/license/hhwfsl/AnimeGirlsDownloader)](LICENSE.txt)
-
-AnimeGirlsDownloader 是一个基于 WinUI 3 和 .NET 8 的 Windows 图片浏览、下载与上传客户端，与 [AnimeGirlsCollection](https://github.com/hhwfsl/AnimeGirlsCollection) 服务端配套使用。
+AnimeGirlsDownloader 是一个基于 WinUI 3 和 .NET 8 的 Windows 图片浏览、下载与上传客户端。
 
 ## 功能
 
