@@ -1,11 +1,12 @@
 using AnimeGirlsDownloader.Enums;
+using AnimeGirlsDownloader.Interfaces;
 using AnimeGirlsDownloader.Models;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Windows.System;
 
 namespace AnimeGirlsDownloader;
 
@@ -33,13 +34,11 @@ public static class UpdatePrompt
             };
             if (await dialog.ShowAsync() != ContentDialogResult.Primary) return;
 
-            bool launched = await Launcher.LaunchUriAsync(update.DownloadUri);
-            if (!launched)
-            {
-                AppLogger.LogWarningWithInfoBar(
-                    AppResourceLoader.GetString("Error_UpdatePrompt_OpenDownload_1"),
-                    InfoBarInfoType.Auto);
-            }
+            IDownloadManager downloadManager = App.Current.Services.GetRequiredService<IDownloadManager>();
+            DownloadItem item = downloadManager.EnqueueUpdate(update);
+            AppLogger.LogInfoWithInfoBar(
+                string.Format(AppResourceLoader.GetString("Info_UpdatePrompt_UpdateQueued_1"), item.DisplayName),
+                InfoBarInfoType.Auto);
         }
         catch (Exception exception)
         {

@@ -17,6 +17,9 @@ public sealed class UpdateCheckResult
     public required string CurrentVersion { get; init; }
     public string? LatestVersion { get; init; }
     public Uri? DownloadUri { get; init; }
+    public string? AssetName { get; init; }
+    public long AssetSize { get; init; } = -1;
+    public string? AssetDigest { get; init; }
     public string? ErrorMessage { get; init; }
 }
 
@@ -39,4 +42,10 @@ internal sealed class GitHubReleaseAsset
 
     [JsonPropertyName("browser_download_url")]
     public required string BrowserDownloadUrl { get; init; }
+
+    [JsonPropertyName("size")]
+    public long Size { get; init; }
+
+    [JsonPropertyName("digest")]
+    public string? Digest { get; init; }
 }

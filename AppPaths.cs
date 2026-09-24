@@ -14,6 +14,9 @@ public static class AppPaths
     public static string LogDirectory { get; } = Path.Combine(InstallDirectory, "logs");
     public static string UsersDirectory { get; } = Path.Combine(InstallDirectory, "users");
     public static string AnonymousUserDirectory { get; } = Path.Combine(UsersDirectory, "anonymous");
+    public static string UpdateDirectory { get; } = Path.Combine(InstallDirectory, ".update");
+    public static string UpdateDownloadsDirectory { get; } = Path.Combine(UpdateDirectory, "downloads");
+    public static string UpdateStagingDirectory { get; } = Path.Combine(UpdateDirectory, "staging");
     public static string SettingsFilePath { get; } = Path.Combine(AnonymousUserDirectory, "config.json");
     public static string ActiveUserFilePath { get; } = Path.Combine(UsersDirectory, "active-user.txt");
     public static string LegacyTokenMigrationMarkerFilePath { get; } = Path.Combine(UsersDirectory, ".legacy-token-migrated");
@@ -31,6 +34,8 @@ public static class AppPaths
         Directory.CreateDirectory(LogDirectory);
         Directory.CreateDirectory(UsersDirectory);
         Directory.CreateDirectory(AnonymousUserDirectory);
+        Directory.CreateDirectory(UpdateDownloadsDirectory);
+        Directory.CreateDirectory(UpdateStagingDirectory);
     }
 
     public static string GetUserDirectory(long userId)

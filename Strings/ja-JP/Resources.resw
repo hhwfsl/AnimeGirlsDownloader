@@ -351,11 +351,17 @@
   <data name="DownloadItem_DisplayName" xml:space="preserve">
     <value>画像 {0}</value>
   </data>
+  <data name="DownloadItem_UpdateDisplayName" xml:space="preserve">
+    <value>アプリ更新 {0}</value>
+  </data>
   <data name="DownloadStatus_Queued" xml:space="preserve">
     <value>待機中</value>
   </data>
   <data name="DownloadStatus_Downloading" xml:space="preserve">
     <value>ダウンロード中</value>
+  </data>
+  <data name="DownloadStatus_PreparingUpdate" xml:space="preserve">
+    <value>更新を準備中</value>
   </data>
   <data name="DownloadStatus_Canceling" xml:space="preserve">
     <value>キャンセル中</value>
@@ -414,10 +420,11 @@
   <data name="CurrentVersion_TextBlock.Text" xml:space="preserve"><value>現在のバージョン:</value></data>
   <data name="CheckForUpdates_Button.Content" xml:space="preserve"><value>更新を確認</value></data>
   <data name="UpdateAvailable_Dialog_Title" xml:space="preserve"><value>新しいバージョンがあります</value></data>
-  <data name="UpdateAvailable_Dialog_Message" xml:space="preserve"><value>現在のバージョン: {0}&#xA;最新バージョン: {1}&#xA;今すぐダウンロードしますか？</value></data>
-  <data name="UpdateAvailable_Dialog_Download" xml:space="preserve"><value>ダウンロード</value></data>
+  <data name="UpdateAvailable_Dialog_Message" xml:space="preserve"><value>現在のバージョン: {0}&#xA;最新バージョン: {1}&#xA;更新パッケージをダウンロードキューに追加し、完了後に自動でインストールして再起動します。</value></data>
+  <data name="UpdateAvailable_Dialog_Download" xml:space="preserve"><value>ダウンロードしてインストール</value></data>
   <data name="UpdateAvailable_Dialog_Cancel" xml:space="preserve"><value>キャンセル</value></data>
-  <data name="Error_UpdatePrompt_OpenDownload_1" xml:space="preserve"><value>更新のダウンロードリンクを開けませんでした。</value></data>
+  <data name="Info_UpdatePrompt_UpdateQueued_1" xml:space="preserve"><value>{0}をダウンロードキューに追加しました。</value></data>
+  <data name="Success_DownloadManager_UpdateReady_1" xml:space="preserve"><value>更新の準備が完了しました。アプリを再起動します。</value></data>
   <data name="Success_UpdateService_UpToDate_1" xml:space="preserve"><value>現在のバージョンは最新です。</value></data>
   <data name="Warning_UpdateService_CheckFailed_1" xml:space="preserve"><value>更新を確認できませんでした。後でもう一度お試しください。</value></data>
   <data name="Warning_MainWindow_LoginRequiredForUpload_1" xml:space="preserve"><value>アップロード画面を開く前にログインしてください。</value></data>

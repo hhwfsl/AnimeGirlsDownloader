@@ -13,11 +13,18 @@ public sealed class DownloadItem : INotifyPropertyChanged
     private string _destinationPath = string.Empty;
 
     public Guid Id { get; } = Guid.NewGuid();
+    public DownloadItemKind Kind { get; set; } = DownloadItemKind.Image;
     public long UserId { get; set; }
     public string ImageId { get; set; } = string.Empty;
     public string DownloadUrl { get; set; } = string.Empty;
     public string DestinationDirectory { get; set; } = string.Empty;
-    public string DisplayName => string.Format(AppResourceLoader.GetString("DownloadItem_DisplayName"), ImageId);
+    public string? Version { get; set; }
+    public long ExpectedSize { get; set; } = -1;
+    public string? ExpectedDigest { get; set; }
+    public bool IsGlobal => Kind == DownloadItemKind.ApplicationUpdate;
+    public string DisplayName => Kind == DownloadItemKind.ApplicationUpdate
+        ? string.Format(AppResourceLoader.GetString("DownloadItem_UpdateDisplayName"), Version)
+        : string.Format(AppResourceLoader.GetString("DownloadItem_DisplayName"), ImageId);
 
     public double Progress { get => _progress; set => SetField(ref _progress, value); }
     public DownloadStatus Status

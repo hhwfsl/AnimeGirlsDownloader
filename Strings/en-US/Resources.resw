@@ -351,11 +351,17 @@
   <data name="DownloadItem_DisplayName" xml:space="preserve">
     <value>Image {0}</value>
   </data>
+  <data name="DownloadItem_UpdateDisplayName" xml:space="preserve">
+    <value>Application update {0}</value>
+  </data>
   <data name="DownloadStatus_Queued" xml:space="preserve">
     <value>Queued</value>
   </data>
   <data name="DownloadStatus_Downloading" xml:space="preserve">
     <value>Downloading</value>
+  </data>
+  <data name="DownloadStatus_PreparingUpdate" xml:space="preserve">
+    <value>Preparing update</value>
   </data>
   <data name="DownloadStatus_Canceling" xml:space="preserve">
     <value>Canceling</value>
@@ -423,16 +429,19 @@
   <data name="UpdateAvailable_Dialog_Message" xml:space="preserve">
     <value>Current version: {0}
 Latest version: {1}
-Would you like to download it now?</value>
+The update will be downloaded in the download queue. The app will then install it and restart automatically.</value>
   </data>
   <data name="UpdateAvailable_Dialog_Download" xml:space="preserve">
-    <value>Download</value>
+    <value>Download and install</value>
   </data>
   <data name="UpdateAvailable_Dialog_Cancel" xml:space="preserve">
     <value>Cancel</value>
   </data>
-  <data name="Error_UpdatePrompt_OpenDownload_1" xml:space="preserve">
-    <value>Unable to open the update download link.</value>
+  <data name="Info_UpdatePrompt_UpdateQueued_1" xml:space="preserve">
+    <value>{0} was added to the download queue.</value>
+  </data>
+  <data name="Success_DownloadManager_UpdateReady_1" xml:space="preserve">
+    <value>The update is ready. The app will now restart.</value>
   </data>
   <data name="Success_UpdateService_UpToDate_1" xml:space="preserve">
     <value>You are using the latest version.</value>

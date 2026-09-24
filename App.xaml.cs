@@ -34,6 +34,7 @@ public partial class App : Application
         services.AddSingleton(httpClient);
         services.AddSingleton<IAnimeGirlsApiClient, AnimeGirlsApiClient>();
         services.AddSingleton<IUserSessionService, UserSessionService>();
+        services.AddSingleton<ISelfUpdateService, SelfUpdateService>();
         services.AddSingleton<IDownloadManager, DownloadManager>();
         services.AddSingleton<IUpdateService, UpdateService>();
         Services = services.BuildServiceProvider();
@@ -50,5 +51,23 @@ public partial class App : Application
     {
         _window = new MainWindow();
         _window.Activate();
+    }
+
+    public void ExitForUpdate()
+    {
+        if (_window is null)
+        {
+            Environment.Exit(0);
+            return;
+        }
+
+        if (!_window.DispatcherQueue.TryEnqueue(() =>
+        {
+            _window.Close();
+            Environment.Exit(0);
+        }))
+        {
+            Environment.Exit(0);
+        }
     }
 }

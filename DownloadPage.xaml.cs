@@ -39,7 +39,7 @@ public sealed partial class DownloadPage : Page
     {
         long userId = _settingService.GetSettings().LoggedUserId ?? 0;
         _visibleItems.Clear();
-        foreach (DownloadItem item in _downloadManager.Items.Where(item => item.UserId == userId))
+        foreach (DownloadItem item in _downloadManager.Items.Where(item => item.IsGlobal || item.UserId == userId))
             _visibleItems.Add(item);
     }
 

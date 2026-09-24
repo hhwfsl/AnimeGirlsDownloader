@@ -251,7 +251,7 @@ namespace AnimeGirlsDownloader
         private void UpdateDownloadQueueBadge()
         {
             long userId = _settingService.GetSettings().LoggedUserId ?? 0;
-            DownloadItem[] items = _downloadManager.Items.Where(item => item.UserId == userId).ToArray();
+            DownloadItem[] items = _downloadManager.Items.Where(item => item.IsGlobal || item.UserId == userId).ToArray();
             if (items.Length == 0)
             {
                 DownloadQueueBadge.Visibility = Visibility.Collapsed;

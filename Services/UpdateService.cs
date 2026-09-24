@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -63,15 +64,18 @@ public sealed class UpdateService : IUpdateService
                 };
             }
 
-            Uri? downloadUri = SelectDownloadUri(release);
-            return downloadUri is null
-                ? Failed("The latest GitHub release does not have a valid download URL.")
+            GitHubReleaseAsset? asset = SelectDownloadAsset(release);
+            return asset is null || !Uri.TryCreate(asset.BrowserDownloadUrl, UriKind.Absolute, out Uri? downloadUri)
+                ? Failed("The latest GitHub release does not contain a compatible Windows ZIP package.")
                 : new UpdateCheckResult
                 {
                     Status = UpdateCheckStatus.UpdateAvailable,
                     CurrentVersion = CurrentVersion,
                     LatestVersion = FormatVersion(latestVersion),
                     DownloadUri = downloadUri,
+                    AssetName = asset.Name,
+                    AssetSize = asset.Size,
+                    AssetDigest = asset.Digest,
                 };
         }
         catch (Exception exception) when (exception is HttpRequestException or JsonException or TaskCanceledException)
@@ -113,23 +117,38 @@ public sealed class UpdateService : IUpdateService
             ? $"{version.Major}.{version.Minor}.{version.Build}"
             : $"{version.Major}.{version.Minor}";
 
-    private static Uri? SelectDownloadUri(GitHubReleaseResponse release)
+    private static GitHubReleaseAsset? SelectDownloadAsset(GitHubReleaseResponse release)
     {
-        GitHubReleaseAsset? asset = release.Assets
-            .Where(asset => Uri.IsWellFormedUriString(asset.BrowserDownloadUrl, UriKind.Absolute))
+        return release.Assets
+            .Where(IsTrustedZipAsset)
             .OrderByDescending(asset => GetAssetScore(asset.Name))
             .FirstOrDefault();
-        string candidate = asset?.BrowserDownloadUrl ?? release.HtmlUrl;
-        return Uri.TryCreate(candidate, UriKind.Absolute, out Uri? uri) ? uri : null;
     }
+
+    private static bool IsTrustedZipAsset(GitHubReleaseAsset asset) =>
+        asset.Name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase) &&
+        Uri.TryCreate(asset.BrowserDownloadUrl, UriKind.Absolute, out Uri? uri) &&
+        uri.Scheme == Uri.UriSchemeHttps &&
+        uri.Host.Equals("github.com", StringComparison.OrdinalIgnoreCase) &&
+        uri.AbsolutePath.StartsWith(
+            "/hhwfsl/AnimeGirlsDownloader/releases/download/",
+            StringComparison.OrdinalIgnoreCase);
 
     private static int GetAssetScore(string name)
     {
         string normalized = name.ToLowerInvariant();
         int score = 0;
-        if (normalized.Contains("win-x64")) score += 8;
+        string architecture = RuntimeInformation.ProcessArchitecture switch
+        {
+            Architecture.X64 => "x64",
+            Architecture.X86 => "x86",
+            Architecture.Arm64 => "arm64",
+            _ => string.Empty,
+        };
+        if (architecture.Length > 0 && normalized.Contains($"win-{architecture}")) score += 16;
+        else if (normalized.Contains("win-x64")) score += 8;
         else if (normalized.Contains("windows") || normalized.Contains("win")) score += 4;
-        if (normalized.EndsWith(".zip") || normalized.EndsWith(".exe") || normalized.EndsWith(".msix")) score += 2;
+        if (normalized.EndsWith(".zip")) score += 2;
         return score;
     }
 }

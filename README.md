@@ -15,7 +15,7 @@ AnimeGirlsDownloader 是一个基于 WinUI 3 和 .NET 8 的 Windows 图片浏览
 - 支持图片与文件夹混合批量上传，以及单图标签编辑。
 - 支持简体中文、英语和日语。
 - 支持浅色与深色主题。
-- 启动时后台检查 GitHub Releases，并支持在设置页手动检查更新。
+- 启动时后台检查 GitHub Releases，并支持在设置页手动检查更新和应用内自动安装。
 
 ## 系统要求
 
@@ -41,6 +41,7 @@ AnimeGirlsDownloader 是一个基于 WinUI 3 和 .NET 8 的 Windows 图片浏览
 - 登录后可上传图片、修改并同步账号资料，以及使用用户专属设置；未登录时无法进入上传页面。
 - 上传页面支持同时选择多个图片和文件夹；只有单独选择一张图片时才能编辑标签。
 - 设置页面可切换主题、语言、默认下载目录并检查版本更新。语言设置在重新启动应用后生效。
+- 确认更新后，ZIP 更新包会进入普通下载队列；下载完成后应用会校验并解压更新包，覆盖程序文件并自动重启。更新过程不会覆盖用户数据和日志。
 
 ## 本地数据
 
@@ -50,6 +51,7 @@ AnimeGirlsDownloader 是一个基于 WinUI 3 和 .NET 8 的 Windows 图片浏览
 AnimeGirlsDownloader/
 ├─ Assets/                 应用资源
 ├─ logs/                   公共日志
+├─ .update/                自动更新临时文件（更新完成后自动清理）
 └─ users/
    ├─ active-user.txt      当前登录用户
    ├─ anonymous/           未登录用户设置
